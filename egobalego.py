@@ -3,6 +3,8 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from mistune import create_markdown
 
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--open", action='store_true', help="Open browser page on start")
@@ -11,9 +13,19 @@ parser.add_argument("--debug", action='store_true', help="Flask debug mode")
 parser.add_argument("--lang", type=str, default="en_us", help='Website language')
 
 dirname = os.path.dirname(__file__)
+data_folder = os.path.join(dirname, "data")
+app_version_file = os.path.join(data_folder, "app_version")
+translations_file = os.path.join(data_folder, "translations.json")
+server_data_file = os.path.join(data_folder, "server_data.json")
+last_id_file = os.path.join(data_folder, "last_id.txt")
+color_theme_file = os.path.join(data_folder, "color_theme")
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+translations = {}
+server_data = []
+last_id = 0
+color_theme = "light"
+update_available = False
+lang = ""
 
 
 # App Routes
@@ -138,11 +150,11 @@ def handle_mod_response(response):
 def load_data():
     global server_data
     try:
-        with open('server_data.json', 'r') as f:
+        with open(server_data_file, 'r') as f:
             data = f.read()
             server_data = json.loads(data)
     except FileNotFoundError:
-        print("Could not find the file server_data.json, it will be created the first time you add something.")
+        print(f"Could not find the file {server_data_file}, it will be created the first time you add something.")
     except Exception as e:
         print("Server data could not be loaded and was reset, changes will apply on the next edit:", e)
 
@@ -180,29 +192,27 @@ def remove_data(items_to_remove):
                 server_data.remove(object)
 
 def update_database():
-    with open("last_id.txt", "w") as f:
+    with open(last_id_file, "w") as f:
         f.write(str(last_id))
-    with open('server_data.json', 'w') as f:
+    with open(server_data_file, 'w') as f:
         json.dump(server_data, f, indent=4)
 
 def update_color_theme():
-    with open("color_theme.txt", "w") as f:
+    with open(color_theme_file, "w") as f:
         f.write(color_theme)
 
-def md_content(name: str):
-    with open(os.path.join(dirname, "templates", "content", f'{name}.md'), 'r', encoding='UTF-8') as f:
+def md_content(file_name):
+    with open(os.path.join(dirname, "templates", "content", f'{file_name}.md'), 'r', encoding='UTF-8') as f:
         parser = create_markdown(escape=False, plugins=['strikethrough', 'footnotes', 'table'])
         return parser(f.read())
 
 def load_translations():
     global translations
-    translations_path = os.path.join(dirname, 'translations.json')
-    with open(translations_path, 'r', encoding='utf-8') as f:
+    with open(translations_file, 'r', encoding='utf-8') as f:
         translations = json.load(f)
 
 def load_last_id():
     global last_id
-    last_id_file = "last_id.txt"
     try:
         with open(last_id_file, "r") as f:
             try:
@@ -216,7 +226,6 @@ def load_last_id():
 
 def load_color_theme():
     global color_theme
-    color_theme_file = "color_theme.txt"
     try:
         with open(color_theme_file, "r") as f:
             color_theme = f.read()
@@ -232,28 +241,20 @@ def check_for_updates():
     github_version_url = 'https://raw.githubusercontent.com/costantino2000/egobalego-at-home/refs/heads/main/app_version'
     try:
         req = requests.get(github_version_url)
-        with open ("app_version") as f:
+        with open (app_version_file, "r") as f:
             local_version = f.read()
         if req.status_code == requests.codes.ok:
             github_version = req.text
             if float(local_version) < float(github_version):
                 global update_available
                 update_available = True
-                print("An update was found.")
+                print("Update checker: an update was found.")
             else:
-                print("No updates available.")
+                print("Update checker: no updates available.")
         else:
             print('Error during update check: file not found on GitHub.')
     except Exception as e:
         print("Error during update check:", e)
-
-
-translations = {}
-server_data = []
-last_id = 0
-color_theme = "light"
-update_available = False
-lang = ""
 
 
 if __name__ == '__main__':

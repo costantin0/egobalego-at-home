@@ -16,7 +16,7 @@ if (!(Test-Path $venv)) {
 # Install Flask if it's not already installed
 pip install -r "$PSScriptRoot\requirements.txt"
 
-$script = $PSScriptRoot + "\start-server.py"
+$script = $PSScriptRoot + "\egobalego.py"
 echo $script
 
 $lang = $args[0]
