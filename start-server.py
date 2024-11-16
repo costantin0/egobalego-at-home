@@ -229,7 +229,7 @@ def load_color_theme():
         update_color_theme()
 
 def check_for_updates():
-    github_version_url = 'https://raw.githubusercontent.com/filloax/ruins-of-growsseth/refs/heads/dev/1.21.0/tools/egobalego-at-home/app_version'
+    github_version_url = 'https://raw.githubusercontent.com/costantino2000/egobalego-at-home/refs/heads/main/app_version'
     try:
         req = requests.get(github_version_url)
         with open ("app_version") as f:
