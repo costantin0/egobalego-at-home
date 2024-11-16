@@ -266,6 +266,7 @@ if __name__ == '__main__':
 
     load_translations()
     load_data()
+    load_last_id()
     load_color_theme()
     check_for_updates()
     lang = args_lang
