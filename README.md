@@ -1,4 +1,4 @@
-### ENGLISH
+### 🇬🇧 ENGLISH
 
 This is the repository of the Egobalego at Home webapp, used to control the [Ruins of Growsseth](https://github.com/filloax/ruins-of-growsseth) Minecraft mod remotely.
 
@@ -13,7 +13,7 @@ For information on how to use it please read the [Gamemaster Mode](https://githu
 </details>
 
 
-### ITALIANO
+### 🇮🇹 ITALIANO
 Questo è il repository della webapp Egobalego at Home, usata per controllare la mod di Minecraft [Ruins of Growsseth](https://github.com/filloax/ruins-of-growsseth) a distanza.
 
 Per informazioni sull'utilizzo, leggere la pagina sulla [Modalità Gamemaster](https://github.com/filloax/ruins-of-growsseth/wiki/ITA-%E2%80%90-Modalit%C3%A0-Gamemaster) della wiki della mod.
