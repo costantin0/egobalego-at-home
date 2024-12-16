@@ -4,6 +4,8 @@ This is the repository of the Egobalego at Home webapp, used to control the [Rui
 
 For information on how to use it please read the [Gamemaster Mode](https://github.com/filloax/ruins-of-growsseth/wiki/EN-%E2%80%90-Gamemaster-Mode)'s page of the mod's wiki.
 
+Want to add a new language? [Read here](./docs/add_new_languages.md)!
+
 <details>
   <summary>Notes for migrating the data from the old version (click to open)</summary>
   If you were using the version available from the GitHub releases of the mod, take note of these information:
