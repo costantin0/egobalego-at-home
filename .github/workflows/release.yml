@@ -1,0 +1,46 @@
+name: Release New Version
+
+on:
+  push:
+    branches:
+      "main"
+    paths:
+      - data/app_version
+
+permissions:
+  contents: write
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4.2.2
+
+    - name: Get new version tag
+      id: get_new_version
+      run: |
+        app_version=`cat ./data/app_version`
+        echo "release_tag=$app_version" >> $GITHUB_OUTPUT
+
+    - name: Zip release
+      uses: TheDoctor0/zip-release@0.7.6
+      with:
+        type: 'zip'
+        exclusions: '*.git*'
+        filename: 'Egobalego.at.Home.zip'
+
+    - name: Extract latest changelog
+      id: get_latest_changelog
+      run: |
+        latest_version=$(grep -m 1 -oP '(?<=##\s)\d+\.\d+' changelog.md)
+        latest_changelog=$(sed -n "/## $latest_version/,/## /p" changelog.md | sed '$d')
+        echo "$latest_changelog" > latest_changelog.txt
+
+    - name: Upload release
+      uses: ncipollo/release-action@v1.14.0
+      with:
+        artifacts: "Egobalego.at.Home.zip"
+        bodyFile: latest_changelog.txt
+        name: Egobalego at Home v${{steps.get_new_version.outputs.release_tag}}
+        tag: ${{steps.get_new_version.outputs.release_tag}}
+        token: ${{ secrets.GITHUB_TOKEN }}
