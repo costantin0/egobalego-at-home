@@ -13,7 +13,7 @@ parser.add_argument("--debug", action=argparse.BooleanOptionalAction, default=Tr
 parser.add_argument("--lang", default="en_us", help='Website language')
 
 dirname = os.path.dirname(__file__)
-data_folder = os.path.join(dirname, "data")
+data_folder = os.path.join(dirname, "..", "data")
 app_version_file = os.path.join(data_folder, "app_version")
 translations_file = os.path.join(data_folder, "translations.json")
 server_data_file = os.path.join(data_folder, "server_data.json")

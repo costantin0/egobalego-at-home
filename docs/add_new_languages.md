@@ -18,12 +18,12 @@ Now, here's what you have to do:
     }
 ```
 
-- Navigate to the [content folder](./../templates/content/), create a copy of the `en_us` folder, rename it to your language's code and translate the files inside it.
+- Navigate to the [content folder](./../program/templates/content/), create a copy of the `en_us` folder, rename it to your language's code and translate the files inside it.
 
 - Create in the [root](./..) folder a new .bat file called `start-server-YOUR_LANGUAGE_NAME.bat` and write this inside it (replace `YOUR_LANGUAGE_CODE` with the code of your language):
 ```ps1
     @echo off
-    powershell -ExecutionPolicy Bypass -File "%~dp0run-app.ps1" "YOUR_LANGUAGE_CODE"
+    powershell -ExecutionPolicy Bypass -File "%~dp0/program/run-app.ps1" "YOUR_LANGUAGE_CODE"
     pause
 ```
 

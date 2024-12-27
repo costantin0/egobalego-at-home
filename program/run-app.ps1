@@ -6,17 +6,17 @@ if (-not $pythonExists) {
 }
 
 # Check if the virtual environment exists, create it if it doesn't
-$venv = $PSScriptRoot + "\.venv"
-if (!(Test-Path $venv)) {
+$venvPath = "$PSScriptRoot\..\.venv"
+if (!(Test-Path $venvPath)) {
     Write-Host "Virtual environment does not exist. Creating now (please wait)."
-    py -m venv $venv
+    py -m venv $venvPath
 }
 
 # Activate the virtual environment
-& "$venv\Scripts\Activate.ps1"
+& "$venvPath\Scripts\Activate.ps1"
 
 # Install requirements if they are not already installed
-pip install -r "$PSScriptRoot\requirements.txt"
+& "$venvPath\Scripts\python.exe" -m pip install -r "$PSScriptRoot\requirements.txt"
 
 # Run the Python script with the passed language argument
 $script = $PSScriptRoot + "\egobalego.py"
