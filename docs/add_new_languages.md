@@ -4,7 +4,7 @@ You wish to translate Egobalego at Home in your language? You can follow this gu
 
 Now, here's what you have to do:
 
-- First, download the webapp from the [releases](https://github.com/costantino2000/egobalego-at-home/releases) (if you are familiar with GitHub, clone the repository instead, so that you can make a pull request later) and open its folder, possibly with [Visual Studio Code](https://code.visualstudio.com/) or similar programs.
+- First, download the webapp from the [releases](https://github.com/costantin0/egobalego-at-home/releases) (if you are familiar with GitHub, clone the repository instead, so that you can make a pull request later) and open its folder, possibly with [Visual Studio Code](https://code.visualstudio.com/) or similar programs.
 
 - Choose a code for your language, possibly from the [Minecraft language list](https://minecraft.wiki/w/Language). For example, English is `en_us`.
 
@@ -30,4 +30,4 @@ Now, here's what you have to do:
 And that's it! You can run the newly created .bat file to test your translation.
 
 If you are familiar with Git and GitHub and you cloned the repository, make a pull request, I'll merge it and add the new language!
-If you are not familiar with them, you can [create a discussion](https://github.com/costantino2000/egobalego-at-home/discussions) and attach your translation files there, I'll manage from there.
+If you are not familiar with them, you can [create a discussion](https://github.com/costantin0/egobalego-at-home/discussions) and attach your translation files there, I'll manage from there.
