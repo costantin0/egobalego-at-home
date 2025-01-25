@@ -240,7 +240,7 @@ def load_color_theme():
 def check_for_updates():
     github_version_url = 'https://raw.githubusercontent.com/costantin0/egobalego-at-home/refs/heads/main/data/app_version'
     try:
-        req = requests.get(github_version_url)
+        req = requests.get(github_version_url, timeout=10)
         with open (app_version_file, "r") as f:
             local_version = f.read()
         if req.status_code == requests.codes.ok:
@@ -248,13 +248,13 @@ def check_for_updates():
             if float(local_version) < float(github_version):
                 global update_available
                 update_available = True
-                print("Update checker: an update was found.")
+                print("\nUpdate checker: an update was found.\n")
             else:
-                print("Update checker: no updates available.")
+                print("\nUpdate checker: no updates available.\n")
         else:
-            print('Error during update check: file not found on GitHub.')
+            print('\nError during update check: response status code was not "OK".\n')
     except Exception as e:
-        print("Error during update check:", e)
+        print(f"\nError during update check:\n{e}\n")
 
 
 if __name__ == '__main__':
