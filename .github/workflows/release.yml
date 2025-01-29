@@ -27,7 +27,7 @@ jobs:
       with:
         type: 'zip'
         exclusions: '*.git*'
-        filename: 'Egobalego.at.Home.zip'
+        filename: 'Egobalego.at.Home.v${{steps.get_new_version.outputs.release_tag}}.zip'
 
     - name: Extract latest changelog
       id: get_latest_changelog
@@ -39,7 +39,7 @@ jobs:
     - name: Upload release
       uses: ncipollo/release-action@v1.14.0
       with:
-        artifacts: "Egobalego.at.Home.zip"
+        artifacts: "Egobalego.at.Home.v${{steps.get_new_version.outputs.release_tag}}.zip"
         bodyFile: latest_changelog.txt
         name: Egobalego at Home v${{steps.get_new_version.outputs.release_tag}}
         tag: ${{steps.get_new_version.outputs.release_tag}}
