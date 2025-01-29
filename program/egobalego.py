@@ -24,6 +24,8 @@ translations = {}
 server_data = []
 last_id = 0
 color_theme = "light"
+local_version = 0
+github_version = 0
 update_available = False
 lang = ""
 
@@ -71,6 +73,8 @@ def render_custom_template(page_name, help_key = None):
     }
     if page_name == "home":
         params["update_available"] = update_available
+        params["local_version"] = local_version
+        params["github_version"] = github_version
     return render_template(f"{page_name}.html", **params)
 
 
@@ -238,6 +242,7 @@ def load_color_theme():
         update_color_theme()
 
 def check_for_updates():
+    global local_version, github_version
     github_version_url = 'https://raw.githubusercontent.com/costantin0/egobalego-at-home/refs/heads/main/data/app_version'
     try:
         req = requests.get(github_version_url, timeout=10)
