@@ -11,6 +11,8 @@
 .title-font {
     font-family: 'Minecraft';
     font-size: 32px;
+    display: inline-block;
+    line-height: 90%;
 }
 
 .active{
