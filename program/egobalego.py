@@ -20,10 +20,13 @@ server_data_file = os.path.join(data_folder, "server_data.json")
 last_id_file = os.path.join(data_folder, "last_id.txt")
 color_theme_file = os.path.join(data_folder, "color_theme")
 
+LIGHT_THEME = "light"
+DARK_THEME = "dark"
+
 translations = {}
 server_data = []
 last_id = 0
-color_theme = "light"
+color_theme = LIGHT_THEME
 local_version = 0
 github_version = 0
 update_available = False
@@ -96,7 +99,7 @@ def send_last_id():
 @app.route('/switch_theme', methods=['GET'])
 def switch_color_theme():
     global color_theme
-    color_theme = "dark" if color_theme == "light" else "light"
+    color_theme = DARK_THEME if color_theme == LIGHT_THEME else LIGHT_THEME
     update_color_theme()
     return "Theme was switched!"
 
@@ -120,7 +123,7 @@ def handle_disconnect():
     emit("mod_disconnect", broadcast=True)
 
 @socketio.on('is_mod_connected')
-def handle_disconnect():
+def get_connection_status():
     return mod_connected_to_socket
 
 @socketio.on('reload')
@@ -233,9 +236,9 @@ def load_color_theme():
     try:
         with open(color_theme_file, "r") as f:
             color_theme = f.read()
-            if (color_theme not in ["light","dark"]):
+            if (color_theme not in [LIGHT_THEME, DARK_THEME]):
                 print(f"The theme '{color_theme}' from the file {color_theme_file} is not valid, will be reset to light.")
-                color_theme = "light"
+                color_theme = LIGHT_THEME
                 update_color_theme()
     except FileNotFoundError:
         print(f"Could not find the file {color_theme_file}, it will be created and the theme will be set to light.")
@@ -267,7 +270,7 @@ if __name__ == '__main__':
     args_open: bool = args.open
     args_port: int = args.port
     args_debug: bool = args.debug
-    args_lang: bool = args.lang
+    args_lang: str = args.lang
 
     load_translations()
     load_data()
