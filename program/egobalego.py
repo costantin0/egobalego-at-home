@@ -1,3 +1,5 @@
+#region Imports and Definitions
+
 import os, json, argparse, webbrowser, requests
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
@@ -29,16 +31,19 @@ COLOR_WARNING = '\033[93m'
 COLOR_ERROR = '\033[91m'
 COLOR_ENDC = '\033[0m'
 
-# Global variables
-translations = {}
-server_data = []
-last_id = 0
-color_theme = THEME_LIGHT
-local_version = 0
-github_version = 0
-update_available = False
-lang = ""
+# Application data and settings
+class AppData:
+    translations = {}
+    lang = "unset"
+    server_data = []
+    last_id = 0
+    color_theme = THEME_LIGHT
+    local_version = "0"
+    github_version = "0"
+    update_available = False
+    websocket_connected = False
 
+#endregion
 
 #region App Routes
 
@@ -76,15 +81,15 @@ def render_custom_template(page_name, help_key = None):
         help_key = f"help_{page_name}"
     params = {
         'name': page_name,
-        'theme': color_theme,
-        'help_title': translations[lang][help_key],
-        'help_content': md_content(lang + f"/{help_key}"),
-        'translations': translations.get(lang, translations[lang])
+        'theme': AppData.color_theme,
+        'help_title': AppData.translations[AppData.lang][help_key],
+        'help_content': md_content(AppData.lang + f"/{help_key}"),
+        'translations': AppData.translations.get(AppData.lang, AppData.translations[AppData.lang])
     }
     if page_name == "home":
-        params["update_available"] = update_available
-        params["local_version"] = local_version
-        params["github_version"] = github_version
+        params["update_available"] = AppData.update_available
+        params["local_version"] = AppData.local_version
+        params["github_version"] = AppData.github_version
     return render_template(f"{page_name}.html", **params)
 
 
@@ -97,43 +102,37 @@ def receive_data():
 @app.route('/server_data', methods=['GET'])
 def send_data():
     load_data()
-    return server_data
+    return AppData.server_data
 
 @app.route('/last_id', methods=['GET'])
 def send_last_id():
-    return str(last_id)
+    return str(AppData.last_id)
 
 @app.route('/switch_theme', methods=['GET'])
 def switch_color_theme():
-    global color_theme
-    color_theme = THEME_DARK if color_theme == THEME_LIGHT else THEME_LIGHT
+    AppData.color_theme = THEME_DARK if AppData.color_theme == THEME_LIGHT else THEME_LIGHT
     update_color_theme()
     return "Theme was switched!"
 
 #endregion
 
-
 #region SocketIO Events
-
-mod_connected_to_socket = False
 
 @socketio.on('mod_connect')
 def handle_connect():
-    global mod_connected_to_socket
-    mod_connected_to_socket = True
+    AppData.websocket_connected = True
     print("Mod connected to websocket")
     emit("mod_connect", broadcast=True)
 
 @socketio.on('mod_disconnect')
 def handle_disconnect():
-    global mod_connected_to_socket
-    mod_connected_to_socket = False
+    AppData.websocket_connected = False
     print("Mod disconnected from websocket")
     emit("mod_disconnect", broadcast=True)
 
 @socketio.on('is_mod_connected')
 def get_connection_status():
-    return mod_connected_to_socket
+    return AppData.websocket_connected
 
 @socketio.on('reload')
 def reload_minecraft():
@@ -162,15 +161,13 @@ def handle_mod_response(response):
 
 #endregion
 
-
-#region Misc functions
+#region Misc Functions
 
 def load_data():
-    global server_data
     try:
         with open(FILE_SERVER_DATA, 'r') as f:
             data = f.read()
-            server_data = json.loads(data)
+            AppData.server_data = json.loads(data)
     except FileNotFoundError:
         print_warning(f"Could not find the file '{FILE_SERVER_DATA}', it will be created the first time you add something.")
     except Exception as e:
@@ -188,39 +185,38 @@ def update_data():
         print_error("Error: no data received from the client!")
 
 def add_data(items_to_add):
-    global last_id
     for new_object in items_to_add:
         found = False
-        if len(server_data) == 0:
-            last_id += 1
-            server_data.append(new_object)
+        if len(AppData.server_data) == 0:
+            AppData.last_id += 1
+            AppData.server_data.append(new_object)
         else:
-            for object in server_data:
+            for object in AppData.server_data:
                 if object["id"] == new_object["id"]:
                     found = True
                     break
             if found:
-                server_data.remove(object)
-                server_data.append(new_object)
+                AppData.server_data.remove(object)
+                AppData.server_data.append(new_object)
             else:
-                last_id += 1
-                server_data.append(new_object)
+                AppData.last_id += 1
+                AppData.server_data.append(new_object)
 
 def remove_data(items_to_remove):
     for new_object in items_to_remove:
-        for object in server_data:
+        for object in AppData.server_data:
             if object["id"] == new_object["id"]:
-                server_data.remove(object)
+                AppData.server_data.remove(object)
 
 def update_database():
-    with open(FILE_LAST_ID, "w") as f:
-        f.write(str(last_id))
+    with open(FILE_LAST_ID, 'w') as f:
+        f.write(str(AppData.last_id))
     with open(FILE_SERVER_DATA, 'w') as f:
-        json.dump(server_data, f, indent=4)
+        json.dump(AppData.server_data, f, indent=4)
 
 def update_color_theme():
-    with open(FILE_COLOR_THEME, "w") as f:
-        f.write(color_theme)
+    with open(FILE_COLOR_THEME, 'w') as f:
+        f.write(AppData.color_theme)
 
 def md_content(file_name):
     with open(os.path.join(FOLDER_PROGRAM, "templates", "content", f"{file_name}.md"), 'r', encoding='UTF-8') as f:
@@ -228,25 +224,23 @@ def md_content(file_name):
         return parser(f.read())
 
 def load_translations():
-    global translations
     with open(FILE_TRANSLATIONS, 'r', encoding='utf-8') as f:
-        translations = json.load(f)
+        AppData.translations = json.load(f)
         language_check()
 
 def language_check():
-    global lang     # note: this assumes that the language is already set
-    if lang in translations.keys():
-        print(f"\nLanguage set to '{lang}'.")
+    # note: this assumes that the language is already set
+    if AppData.lang in AppData.translations.keys():
+        print(f"\nLanguage set to '{AppData.lang}'.")
     else:
-        print_warning(f"\nLanguage '{lang}' is not available, will be set to 'en_us'.")
-        lang = "en_us"
+        print_warning(f"\nLanguage '{AppData.lang}' is not available, will be set to 'en_us'.")
+        AppData.lang = "en_us"
 
 def load_last_id():
-    global last_id
     try:
-        with open(FILE_LAST_ID, "r") as f:
+        with open(FILE_LAST_ID, 'r') as f:
             try:
-                last_id = int(f.read())
+                AppData.last_id = int(f.read())
             except ValueError:
                 print_error(f"Could not parse the content of '{FILE_LAST_ID}' to integer, will be reset to zero.")
     except FileNotFoundError:
@@ -255,29 +249,26 @@ def load_last_id():
         print_error(f"Last index could not be loaded and was reset, changes will apply on the next edit:\n{e}")
 
 def load_color_theme():
-    global color_theme
     try:
-        with open(FILE_COLOR_THEME, "r") as f:
-            color_theme = f.read()
-            if (color_theme not in [THEME_LIGHT, THEME_DARK]):
-                print_error(f"The theme '{color_theme}' from the file '{FILE_COLOR_THEME}' is not valid, will be reset to light.")
-                color_theme = THEME_LIGHT
+        with open(FILE_COLOR_THEME, 'r') as f:
+            AppData.color_theme = f.read()
+            if (AppData.color_theme not in [THEME_LIGHT, THEME_DARK]):
+                print_error(f"The theme '{AppData.color_theme}' from the file '{FILE_COLOR_THEME}' is not valid, will be reset to light.")
+                AppData.color_theme = THEME_LIGHT
                 update_color_theme()
     except FileNotFoundError:
         print_warning(f"Could not find the file '{FILE_COLOR_THEME}', it will be created and the theme will be set to light.")
         update_color_theme()
 
 def check_for_updates():
-    global local_version, github_version
     try:
         req = requests.get(UPDATE_CHECK_URL, timeout=10)
-        with open (FILE_APP_VERSION, "r") as f:
-            local_version = f.read()
+        with open(FILE_APP_VERSION, 'r') as f:
+            AppData.local_version = f.read()
         if req.status_code == requests.codes.ok:
-            github_version = req.text
-            if float(local_version) < float(github_version):
-                global update_available
-                update_available = True
+            AppData.github_version = req.text
+            if float(AppData.local_version) < float(AppData.github_version):
+                AppData.update_available = True
                 print("\nUpdate checker: an update was found.\n")
             else:
                 print("\nUpdate checker: no updates available.\n")
@@ -294,6 +285,7 @@ def print_error(message):
 
 #endregion
 
+#region Main
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -302,7 +294,7 @@ if __name__ == '__main__':
     args_debug: bool = args.debug
     args_lang: str = args.lang
 
-    lang = args_lang
+    AppData.lang = args_lang
     load_translations()
     load_data()
     load_last_id()
@@ -317,3 +309,5 @@ if __name__ == '__main__':
         webbrowser.open(app_url)
 
     socketio.run(app, debug=args_debug, port=args_port)
+
+#endregion
