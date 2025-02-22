@@ -231,6 +231,15 @@ def load_translations():
     global translations
     with open(FILE_TRANSLATIONS, 'r', encoding='utf-8') as f:
         translations = json.load(f)
+        language_check()
+
+def language_check():
+    global lang     # note: this assumes that the language is already set
+    if lang in translations.keys():
+        print(f"\nLanguage set to '{lang}'.")
+    else:
+        print_warning(f"\nLanguage '{lang}' is not available, will be set to 'en_us'.")
+        lang = "en_us"
 
 def load_last_id():
     global last_id
@@ -293,12 +302,12 @@ if __name__ == '__main__':
     args_debug: bool = args.debug
     args_lang: str = args.lang
 
+    lang = args_lang
     load_translations()
     load_data()
     load_last_id()
     load_color_theme()
     check_for_updates()
-    lang = args_lang
 
     app_url = f"http://localhost:{args_port}"
 
