@@ -1,5 +1,11 @@
+# Virtual Environment folder
 .venv
+
+# VSCode settings and Python cache
 .vscode
+__pycache__
+
+# User app data
 data/color_theme
 data/server_data.json
 data/last_id.txt
