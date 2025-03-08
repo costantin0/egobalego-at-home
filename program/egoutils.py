@@ -83,7 +83,7 @@ def language_check():
     if AppData.lang in AppData.translations.keys():
         print(f"\nLanguage set to '{AppData.lang}'.")
     else:
-        print_warning(f"\nLanguage '{AppData.lang}' is not available, will be set to {Consts.DEFAULT_LANG}.")
+        print_warning(f"\nLanguage '{AppData.lang}' is not available, will be set to '{Consts.DEFAULT_LANG}'.")
         AppData.lang = Consts.DEFAULT_LANG
 
 

@@ -20,5 +20,5 @@ if (!(Test-Path $venvPath)) {
 
 # Run the Python script with the passed language argument
 $script = $PSScriptRoot + "\egobalego.py"
-$lang = $args[0]
+$lang = If ([string]::IsNullOrEmpty($args[0])) { "en_us" } Else { $args[0] }
 py $script --open --no-debug --lang $lang
