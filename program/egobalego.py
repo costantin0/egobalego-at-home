@@ -33,7 +33,7 @@ def main():
     app = egoflask.get_flask(__name__)
     socketio = egoflask.get_socketio()
 
-    socketio.init_app(app, cors_allowed_origins=app_url)
+    socketio.init_app(app)
 
     if args_open:
         webbrowser.open(app_url)

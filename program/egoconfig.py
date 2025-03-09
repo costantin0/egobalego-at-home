@@ -28,6 +28,7 @@ class Consts:
     UPDATE_CHECK_URL = "https://raw.githubusercontent.com/costantin0/egobalego-at-home/refs/heads/main/data/app_version"
     THEME_LIGHT = "light"
     THEME_DARK = "dark"
+    COLOR_INFO = '\033[96m'
     COLOR_WARNING = '\033[93m'
     COLOR_ERROR = '\033[91m'
     COLOR_ENDC = '\033[0m'

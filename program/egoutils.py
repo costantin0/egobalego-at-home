@@ -81,9 +81,9 @@ def load_translations():
 def language_check():
     """Checks if the configured language is present in the loaded translations (assumes that the language is already set)"""
     if AppData.lang in AppData.translations.keys():
-        print(f"\nLanguage set to '{AppData.lang}'.")
+        print_info(f"Language set to '{AppData.lang}'.")
     else:
-        print_warning(f"\nLanguage '{AppData.lang}' is not available, will be set to '{Consts.DEFAULT_LANG}'.")
+        print_warning(f"Language '{AppData.lang}' is not available, will be set to '{Consts.DEFAULT_LANG}'.")
         AppData.lang = Consts.DEFAULT_LANG
 
 
@@ -123,14 +123,18 @@ def check_for_updates():
             # Simple version comparison, to avoid importing external libraries
             if float(AppData.local_version) < float(AppData.github_version):
                 AppData.update_available = True
-                print("\nUpdate checker: an update was found.\n")
+                print_info("Update checker: an update was found.")
             else:
-                print("\nUpdate checker: no updates available.\n")
+                print_info("Update checker: no updates available.")
         else:
             print_warning("Error during update check: response status code was not 'OK'.")
     except Exception as e:
-        print_warning(f"Error during update check:\n{e}")
+        print_warning(f"Error during update check. Exception:\n{e}")
 
+
+def print_info(message):
+    """Prints a colored message in the terminal"""
+    print(f"{Consts.COLOR_INFO}{message}{Consts.COLOR_ENDC}")
 
 def print_warning(message):
     """Prints a colored warning in the terminal"""
