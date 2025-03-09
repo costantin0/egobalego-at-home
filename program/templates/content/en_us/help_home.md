@@ -15,7 +15,8 @@ If it's the first time you visit a section, make sure to **read the correspondin
 
 *   During normal usage events will trigger only once, even if edited, in order for the mod to function correctly; if you want to spawn a structure a second time or change the text of a notification, for example, you need to create a new entry!  
     <u>Note</u>: this doesn't apply to all events (trades work differently, for example), but if you follow the next point you won't have any issues;
-*   Do not delete events that have been received by the mod; it's advisable to **deactivate them** and **leave them in the page** to keep a history of what you've done (for the same reason as before, even if you leave them, they won't be re-executed).
+*   Do not delete events that have been received by the mod; it's advisable to **deactivate them** and **leave them in the page** to keep a history of what you've done (for the same reason as before, even if you leave them, they won't be re-executed);
+*   Events are displayed in chronological order based on their initialization (an event is initialized every time it changes color from grey to red).
 
 If you see a "Reload mod data" button on the bottom of a page, it means that the mod is connected to the WebSocket service; you can use it to make the mod instantly reload the website data. To change the website's theme click on the sun icon on the top left.
 

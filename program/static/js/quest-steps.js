@@ -1,3 +1,7 @@
+"use strict";
+
+import { api, state } from "./shared/utils.js";
+
 document.addEventListener("DOMContentLoaded", function () {
     let step1Card = document.getElementById("step-1");
     let step1Switch = document.getElementById("step-1-switch");
@@ -74,10 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     async function getServerData() {
-        const responseForLastId = await fetch("/last_id");
-        lastId = parseInt(await responseForLastId.text());
-        const responseForServerData = await fetch("/server_data");
-        let serverData = await responseForServerData.json();
+        let serverData = await state.loadServerData();
         serverData.forEach(item => {
             if (item.type === "questStep")
                 if (item.id === "quest-step-1") {
@@ -125,9 +126,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         questData = {[action]: questData}
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "/data_receiver");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify(questData));
+        api.sendToServer(questData);
     }
 });

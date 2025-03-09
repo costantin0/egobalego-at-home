@@ -1,15 +1,17 @@
-let lastId;
+"use strict";
+
+import { api, state, addCardButton, CardUtils } from "./shared/utils.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const responseForLastId = await fetch("/last_id");
-    lastId = parseInt(await responseForLastId.text());
-    const responseForServerData = await fetch("/server_data");
-    let serverData = await responseForServerData.json();
+    addCardButton.initialize();
+    state.loadLastId();
+    let serverData = await state.loadServerData();
     let command_types = ["command", "operation"]
     serverData.forEach(item => {
         if (command_types.includes(item.type))
             addCommandCard(false, item);
     });
+    addCardButton.activate(() => addCommandCard(true));
 });
 
 async function updateServer(card, action) {
@@ -30,7 +32,7 @@ async function updateServer(card, action) {
         commandData["content"] = content;
     else {
         commandData["name"] = type;
-        if (type !== "rmResearcher" || type !== "rmTentWithGift") {
+        if (type !== "rmResearcher" && type !== "rmTentWithGift") {
             commandData["x"] = parseInt(x) || 0;
             commandData["y"] = parseInt(y) || 0;
             commandData["z"] = parseInt(z) || 0;
@@ -38,24 +40,19 @@ async function updateServer(card, action) {
     }
     commandData = { [action]: [commandData] };
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/data_receiver");
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(commandData));
+    api.sendToServer(commandData);
 }
 
-document.getElementById("add-card-button").addEventListener("click", function () {
-    addCommandCard(true);
-});
+const cardTemplate = document.querySelector("#command-template");
+const cardContainer = document.getElementById("card-container");
+const confirmDeletionModal = document.getElementById("modal-confirm-deletion");
+const deleteButtonModal = document.getElementById("delete-button-modal");
 
 function addCommandCard(isNew, item) {
-    // Add template to top of container
-    let template = document.querySelector("#command-template").content.cloneNode(true);
-    let cardContainer = document.getElementById("card-container");
-    cardContainer.insertBefore(template, cardContainer.firstChild);
+    let newCard = cardTemplate.content.cloneNode(true);
 
     // Get template elements
-    let thisCard = document.getElementById("command-card");
+    let thisCard = newCard.querySelector("#command-card");
 
     let id = thisCard.querySelector("#card-id");
 
@@ -65,12 +62,7 @@ function addCommandCard(isNew, item) {
     let cardEnablerSwitch = cardEnablerDiv.querySelector("#card-enabler-switch");
     let cardEnablerLabel = cardEnablerDiv.querySelector("#card-enabler-label");
 
-    let deleteCardButton = thisCard.querySelector("#delete-card-button");
-
-    let confirmDeletionModal = document.getElementById("modal-confirm-deletion");
-    let deleteButtonModal = document.getElementById("delete-button-modal");
-
-    let commandSelect = thisCard.querySelector("#command-type");
+    let commandTypeSelect = thisCard.querySelector("#command-type");
 
     let manualCommandDiv = thisCard.querySelector("#manual-command");
     let commandContent = manualCommandDiv.querySelector("#command-content");
@@ -81,20 +73,19 @@ function addCommandCard(isNew, item) {
     let z = coordinatesDiv.querySelector("#z-coord");
 
     if (isNew) {
-        id.value = "command-" + (lastId + 1);
-        lastId++;
+        id.value = "command-" + state.newLastId();
     }
     else {
         id.value = item.id;
         switch (item.type) {
             case "command":
-                commandSelect.value = "manual";
+                commandTypeSelect.value = "manual";
                 manualCommandDiv.hidden = false;
                 commandContent.value = item.content;
                 break;
             case "operation":
-                commandSelect.value = item.name;
-                if (item.name !== "rmResearcher" || item.name !== "rmTentWithGift") {
+                commandTypeSelect.value = item.name;
+                if (item.name !== "rmResearcher" && item.name !== "rmTentWithGift") {
                     coordinatesDiv.hidden = false;
                     x.value = item.x;
                     y.value = item.y;
@@ -105,82 +96,44 @@ function addCommandCard(isNew, item) {
         warningDiv.hidden = true;
         cardEnablerDiv.hidden = false;
         cardEnablerSwitch.checked = item.active
-        changeColorAndLabel(item.active);
+        CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, item.active);
     }
 
-    deleteCardButton.addEventListener("click", function () {
-        if (commandSelect.value === "none") {
-            thisCard.remove();
-        } else {
-            const modal = new bootstrap.Modal(confirmDeletionModal);
-            modal.show();
-            deleteButtonModal.addEventListener("click", function () {
-                updateServer(thisCard, "remove");
-                thisCard.remove();
-            });
-        }
-    });
+    CardUtils.setupDeleteButton(thisCard, commandTypeSelect, confirmDeletionModal, deleteButtonModal, updateServer);
 
-    cardEnablerSwitch.addEventListener("click", function () {
-        changeColorAndLabel(this.checked);
-    });
+    CardUtils.setupEnablerSwitch(thisCard, cardEnablerSwitch, cardEnablerLabel);
 
-    commandSelect.addEventListener("change", function () {
-        let selectedCommand = commandSelect.value;
+    commandTypeSelect.addEventListener("change", function () {
+        let selectedCommand = commandTypeSelect.value;
         if (selectedCommand !== "none") {
             warningDiv.hidden = true;
             cardEnablerDiv.hidden = false;
             cardEnablerSwitch.checked = false;
-            changeColorAndLabel(false);
+            CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, false);
             switch (selectedCommand) {
                 case "manual":
-                    showElements(manualCommandDiv);
-                    hideElements(coordinatesDiv);
+                    CardUtils.showElements(manualCommandDiv);
+                    CardUtils.hideElements(coordinatesDiv);
                     break;
                 case "rmResearcher":
                 case "rmTentWithGift":
-                    hideElements(manualCommandDiv, coordinatesDiv);
+                    CardUtils.hideElements(manualCommandDiv, coordinatesDiv);
                     break;
                 case "tpResearcher":
                 case "spawnResearcher":
                 case "rmTent":
-                    showElements(coordinatesDiv);
-                    hideElements(manualCommandDiv);
+                    CardUtils.showElements(coordinatesDiv);
+                    CardUtils.hideElements(manualCommandDiv);
                     break;
             }
         } else {
-            warningDiv.hidden = false;
-            cardEnablerDiv.hidden = true;
-            thisCard.classList.remove("bg-danger-subtle", "bg-success-subtle");
-            thisCard.classList.add("bg-dark-subtle");
-            hideElements(manualCommandDiv, coordinatesDiv);
+            CardUtils.disableCard(thisCard, warningDiv, cardEnablerDiv)
+            CardUtils.hideElements(manualCommandDiv, coordinatesDiv);
         }
     });
 
-    cardContainer.querySelectorAll('input, select, textarea').forEach(function (element) {
-        element.addEventListener('change', function () {
-            updateServer(thisCard, commandSelect.value !== "none" ? "add" : "remove");
-        });
-    });
+    CardUtils.setupAutoUpdate(thisCard, commandTypeSelect, updateServer);
 
-    function changeColorAndLabel(isActive) {
-        if (isActive)
-            thisCard.classList.remove("bg-dark-subtle", "bg-danger-subtle");
-        else
-            thisCard.classList.remove("bg-dark-subtle", "bg-success-subtle");
-        thisCard.classList.add(isActive ? "bg-success-subtle" : "bg-danger-subtle");
-        cardEnablerLabel.innerText = isActive ? activeText : notActiveText;
-    }
-
-    function showElements(...divs) {
-        for (let div of divs) {
-            div.hidden = false;
-        }
-    }
-
-    function hideElements(...divs) {
-        for (let div of divs) {
-            div.hidden = true;
-        }
-    }
+    // Add card to top of container
+    cardContainer.insertBefore(newCard, cardContainer.firstChild);
 }

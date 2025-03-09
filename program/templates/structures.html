@@ -18,8 +18,8 @@
         </main>
         {% include 'shared/footer.html' %}
     </body>
-    <script> var defaultPreview = "{{url_for('static', filename='img/structure/none.png')}}" </script>
     <script> var activeText = "{{translations.active_2}}" </script>
     <script> var notActiveText = "{{translations.not_active_2}}" </script>
-    <script src="{{ url_for('static', filename='js/structures.js') }}"></script>
+    <script> var defaultPreview = "{{url_for('static', filename='img/structure/none.png')}}" </script>
+    <script src="{{ url_for('static', filename='js/structures.js') }}" type="module"></script>
 </html>

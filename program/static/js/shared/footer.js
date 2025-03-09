@@ -1,4 +1,5 @@
-// Does not run on websocket page, but in every other
+// Does not run on the WebSocket page, but on all the others
+"use strict";
 
 var socket = io();
 
@@ -10,13 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     reloadButton.addEventListener("click", function () {
         socket.emit("reload");
-    });
-
-    socket.emit("is_mod_connected", (response) => {
-        if (response === true)
-            showFooter();
-        else
-            hideFooter();
     });
 
     socket.on('mod_connect', function () {
@@ -53,4 +47,12 @@ document.addEventListener("DOMContentLoaded", function () {
             reloadButton.classList.add("btn-primary");
         }, 1000);
     }
+
+    // When footer is initialized, check if the mod is connected
+    socket.emit("is_mod_connected", (response) => {
+        if (response === true)
+            showFooter();
+        else
+            hideFooter();
+    });
 });
