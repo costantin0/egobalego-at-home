@@ -126,9 +126,9 @@ def _render_custom_template(page_name, help_key=None):
     params = {
         'name': page_name,
         'theme': AppData.color_theme,
-        'help_title': AppData.translations[AppData.lang][help_key],
+        'help_title': AppData.translations[help_key],
         'help_content': _get_md_content(AppData.lang + f"/{help_key}"),
-        'translations': AppData.translations.get(AppData.lang, AppData.translations[AppData.lang])
+        'translations': AppData.translations
     }
 
     if page_name == "home":

@@ -19,9 +19,9 @@ class Consts:
     DEFAULT_PORT = 5000
     DEFAULT_LANG = "en_us"
     FOLDER_PROGRAM = os.path.dirname(__file__)
+    FOLDER_TRANSLATIONS = os.path.join(FOLDER_PROGRAM, "translations")
     FOLDER_DATA = os.path.join(FOLDER_PROGRAM, "..", "data")
     FILE_APP_VERSION = os.path.join(FOLDER_DATA, "app_version")
-    FILE_TRANSLATIONS = os.path.join(FOLDER_DATA, "translations.json")
     FILE_SERVER_DATA = os.path.join(FOLDER_DATA, "server_data.json")
     FILE_LAST_ID = os.path.join(FOLDER_DATA, "last_id.txt")
     FILE_COLOR_THEME = os.path.join(FOLDER_DATA, "color_theme")

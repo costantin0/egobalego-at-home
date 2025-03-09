@@ -1,6 +1,6 @@
 """Main entrypoint of the app"""
 
-import argparse, webbrowser
+import os, argparse, webbrowser
 from egoconfig import AppData, Consts
 import egoflask, egoutils as utils
 
@@ -38,7 +38,10 @@ def main():
     if args_open:
         webbrowser.open(app_url)
 
-    socketio.run(app, debug=args_debug, port=args_port)
+    # If in debug mode, allow testing the translation without restarting the app
+    files_to_watch = [f for f in os.listdir(Consts.FOLDER_TRANSLATIONS) if f.endswith(".json")]
+    
+    socketio.run(app, debug=args_debug, port=args_port, extra_files=files_to_watch)
 
 if __name__ == '__main__':
     main()

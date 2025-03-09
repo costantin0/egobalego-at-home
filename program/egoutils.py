@@ -1,6 +1,6 @@
 """Various utility functions"""
 
-import json, requests
+import os, json, requests
 from egoconfig import AppData, Consts
 
 
@@ -72,19 +72,17 @@ def update_color_theme():
 
 def load_translations():
     """Loads the translations file in memory"""
-    # Essential function, must crash the program if the file is not found
-    with open(Consts.FILE_TRANSLATIONS, 'r', encoding='utf-8') as f:
-        AppData.translations = json.load(f)
-        language_check()
-
-
-def language_check():
-    """Checks if the configured language is present in the loaded translations (assumes that the language is already set)"""
-    if AppData.lang in AppData.translations.keys():
+    # Essential function, must crash the program if both the specified and default files cannot be loaded
+    translations_file = os.path.join(Consts.FOLDER_TRANSLATIONS, f"{AppData.lang}.json")
+    try:
+        with open(translations_file, 'r', encoding='utf-8') as f:
+            AppData.translations = json.load(f)
         print_info(f"Language set to '{AppData.lang}'.")
-    else:
-        print_warning(f"Language '{AppData.lang}' is not available, will be set to '{Consts.DEFAULT_LANG}'.")
-        AppData.lang = Consts.DEFAULT_LANG
+    except FileNotFoundError:
+        print_warning(f"Language file for '{AppData.lang}' could not be found, the app will use '{Consts.DEFAULT_LANG}.json'.")
+        default_translations_file = os.path.join(Consts.FOLDER_TRANSLATIONS, f"{Consts.DEFAULT_LANG}.json")
+        with open(default_translations_file, 'r', encoding='utf-8') as f:
+            AppData.translations = json.load(f)
 
 
 def load_last_id():
