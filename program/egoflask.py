@@ -72,13 +72,13 @@ def get_socketio():
     @socketio.on(SocketEvents.MOD_CONNECT)
     def handle_connect():
         AppData.websocket_connected = True
-        print("Mod connected to websocket")
+        utils.print_info("Mod connected to websocket.")
         emit(SocketEvents.MOD_CONNECT, broadcast=True)
 
     @socketio.on(SocketEvents.MOD_DISCONNECT)
     def handle_disconnect():
         AppData.websocket_connected = False
-        print("Mod disconnected from websocket")
+        utils.print_info("Mod disconnected from websocket.")
         emit(SocketEvents.MOD_DISCONNECT, broadcast=True)
 
     @socketio.on(SocketEvents.IS_MOD_CONNECTED)
@@ -87,27 +87,27 @@ def get_socketio():
 
     @socketio.on(SocketEvents.RELOAD)
     def reload_minecraft():
-        print("Sending reload event")
+        utils.print_info("Sending reload event...")
         emit(SocketEvents.RELOAD, broadcast=True)
 
     @socketio.on(SocketEvents.RESEARCHER_DIALOGUE)
     def send_researcher_dialogue(data):
-        print("Sending rdialogue event:", data)
+        utils.print_info(f"Sending rdialogue event: {data}")
         emit(SocketEvents.RESEARCHER_DIALOGUE, data, broadcast=True)
 
     @socketio.on(SocketEvents.TOAST)
     def send_toast(data):
-        print("Sending toast event:", data)
+        utils.print_info(f"Sending toast event: {data}")
         emit(SocketEvents.TOAST, data, broadcast=True)
 
     @socketio.on(SocketEvents.COMMAND)
     def send_command(data):
-        print("Sending cmd event:", data)
+        utils.print_info(f"Sending cmd event: {data}")
         emit(SocketEvents.COMMAND, data, broadcast=True)
 
     @socketio.on(SocketEvents.MOD_RESPONSE)
     def handle_mod_response(response):
-        print("Received response from the mod:", response)
+        utils.print_info(f"Received response from the mod: {response}")
         emit(SocketEvents.MOD_RESPONSE, response, broadcast=True)
 
     return socketio
@@ -150,5 +150,5 @@ def _get_md_content(file_name):
         utils.print_error(f"File '{md_file_path}' not found, returning error message.")
         return "Error! Help file not found."
     except Exception as e:
-        utils.print_error(f"Error while reading '{md_file_path}': {e}")
+        utils.print_error(f"Error while reading '{md_file_path}'. Exception:\n{e}")
         return "Error! Help file could not be loaded."
