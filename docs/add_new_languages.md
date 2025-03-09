@@ -8,12 +8,10 @@ Now, here's what you have to do:
 
 - Choose a code for your language, possibly from the [Minecraft language list](https://minecraft.wiki/w/Language). For example, English is `en_us`.
 
-- Open the [translation file](./../data/translations.json) and add a new [JSON object](https://www.w3schools.com/js/js_json.asp), following the structure of the other languages (you can copy and paste the `en_us` object, edit the language code and replace the strings on the right):
+- Navigate to the [translations folder](./../program/translations), create a copy of the `en_us.json` file and rename it to your language code (for example `es_es.json`), then open it with your favorite text editor. The file will contain a [JSON object](https://www.w3schools.com/js/js_json.asp) having all the `key: translation` pairs used by the webapp (the keys are used in the HTML to get the corresponding string). Now you can replace the english strings with yours, like this:
 ```jsonc
-    // don't forget to add a comma after the previous one!
-    "YOUR_LANGUAGE_CODE": {
-        "string_1": "Translation 1",
-        "string_2": "Translation 2",
+    {
+        "home_greeting": "Greetings, Game Master!  ->  Hola, Game Master!",
         // ...
     }
 ```

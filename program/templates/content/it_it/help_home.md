@@ -15,9 +15,12 @@ Mi raccomando, la prima volta che entri in una sezione del sito assicurati prima
 
 *   Nell'uso normale, per il corretto funzionamento della mod gli eventi si attiveranno una volta sola, anche se modificati; se si vuole spawnare nuovamente una struttura o modificare il testo di una notifica, per esempio, occorre creare una nuova entry!  
     <u>Nota</u>: questa cosa non vale per tutti gli eventi (gli scambi funzionano in modo diverso per esempio), ma se segui il prossimo punto non avrai problemi;
-*   Non cancellare gli eventi che sono stati ricevuti dalla mod, è consigliabile **disattivarli** e **lasciarli nella pagina** in modo da tenere uno storico di ciò che hai fatto (per lo stesso motivo di prima, anche se li lasci non verranno ri-eseguiti);
-*   L'ordine con cui gli eventi sono mostrati nelle varie pagine è dato da quello in cui sono stati inizializzati (un evento viene inizializzato ogni volta che da grigio diventa rosso).
+*   Non cancellare gli eventi che sono stati ricevuti dalla mod, è consigliabile **disattivarli** e **lasciarli nella pagina** in modo da tenere uno storico di ciò che hai fatto (per lo stesso motivo di prima, anche se li lasci non verranno ri-eseguiti).
 
-Se vedi un pulsante con su scritto "Ricarica dati mod" in fondo a una pagina significa che la mod è connessa al servizio di WebSocket; puoi usarlo per far ricaricare istantaneamente i dati del sito alla mod. Per cambiare il tema del sito clicca sull'icona del sole in alto a sinistra.
+Infine, ecco alcune informazioni utili:
+
+*   Se in fondo a una pagina trovi il pulsante "Ricarica dati mod", significa che la mod è connessa al servizio di WebSocket; puoi premerlo per far ricaricare istantaneamente i dati del sito alla mod (diventa verde se ha avuto successo, rosso se c'è stato un problema);
+*   L'ordine delle card degli eventi nelle varie pagine segue quello di inizializzazione (una card viene inizializzata ogni volta che da grigia diventa rossa);
+*   Se il programma sembra comportarsi in modo strano o smette di funzionare, controlla il terminale che si è aperto all'avvio del programma. I messaggi normali sono in azzurro, gli avvisi in giallo e gli errori in rosso, ed eventuali crash sono in bianco alla fine del log. Se ti capita di trovare errori, me li puoi riportare su [GitHub](https://github.com/costantin0/egobalego-at-home/issues)!
 
 Questo è tutto! Se vuoi tornare alla home per qualsiasi motivo puoi cliccare sul logo del sito, divertiti!
