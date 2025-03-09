@@ -1,14 +1,16 @@
-let lastId;
+"use strict";
+
+import { api, state, addCardButton, CardUtils } from "./shared/utils.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const responseForLastId = await fetch("/last_id");
-    lastId = parseInt(await responseForLastId.text());
-    const responseForServerData = await fetch("/server_data");
-    let serverData = await responseForServerData.json();
+    addCardButton.initialize();
+    state.loadLastId();
+    let serverData = await state.loadServerData();
     serverData.forEach(item => {
         if (item.type === "structure")
             addStructureCard(false, item);
     });
+    addCardButton.activate(() => addStructureCard(true));
 });
 
 async function updateServer(card, action) {
@@ -42,24 +44,19 @@ async function updateServer(card, action) {
         structureData["rotation"] = rotation;
     structureData = { [action]: [structureData] };
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/data_receiver");
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(structureData));
+    api.sendToServer(structureData);
 }
 
-document.getElementById("add-card-button").addEventListener("click", function () {
-    addStructureCard(true);
-});
+const cardTemplate = document.querySelector("#structure-template");
+const cardContainer = document.getElementById("card-container");
+const confirmDeletionModal = document.getElementById("modal-confirm-deletion");
+const deleteButtonModal = document.getElementById("delete-button-modal");
 
 function addStructureCard(isNew, item) {
-    // Add template to top of container
-    let template = document.querySelector("#structure-template").content.cloneNode(true);
-    let cardContainer = document.getElementById("card-container");
-    cardContainer.insertBefore(template, cardContainer.firstChild);
+    let newCard = cardTemplate.content.cloneNode(true);
 
     // Get template elements
-    let thisCard = document.getElementById("structure-card");
+    let thisCard = newCard.querySelector("#structure-card");
 
     let id = thisCard.querySelector("#card-id");
 
@@ -69,14 +66,9 @@ function addStructureCard(isNew, item) {
     let cardEnablerSwitch = cardEnablerDiv.querySelector("#card-enabler-switch");
     let cardEnablerLabel = cardEnablerDiv.querySelector("#card-enabler-label");
 
-    let deleteCardButton = thisCard.querySelector("#delete-card-button");
-
-    let confirmDeletionModal = document.getElementById("modal-confirm-deletion");
-    let deleteButtonModal = document.getElementById("delete-button-modal");
-
     let structurePreview = thisCard.querySelector("#structure-preview");
 
-    let structureSelect = thisCard.querySelector("#structure-type");
+    let structureTypeSelect = thisCard.querySelector("#structure-type");
 
     let golemVariantDiv = thisCard.querySelector("#golem-variant");
     let golemVariantSelect = golemVariantDiv.querySelector("#golem-select");
@@ -92,14 +84,13 @@ function addStructureCard(isNew, item) {
 
     // Setting card
     if (isNew) {
-        id.value = "structure-" + (lastId + 1)
-        lastId++;
+        id.value = "structure-" + state.newLastId();
     }
     else {
         id.value = item.id;
-        structureSelect.value = item.structure;
+        structureTypeSelect.value = item.structure;
         if (item.structure.includes("growsseth:golem_variants")) {
-            structureSelect.value = item.structure.split("/")[0];
+            structureTypeSelect.value = item.structure.split("/")[0];
             let golemVariant = item.structure.split("/")[1]
             golemVariantSelect.value = golemVariant.replace("zombie_", "");
             golemZombieSwitch.checked = item.structure.includes("/zombie_");
@@ -110,23 +101,22 @@ function addStructureCard(isNew, item) {
         rotation.value = item.rotation ? item.rotation : "auto";
         cardEnablerSwitch.checked = item.active
 
-        enableCard(structureSelect.value)
-        changeColorAndLabel(item.active);
-        updatePreview(structureSelect.value)
+        enableStructureCard(structureTypeSelect.value)
+        CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, item.active);
+        updatePreview(structureTypeSelect.value)
     }
 
-    structureSelect.addEventListener("change", function () {
-        let selectedStructure = structureSelect.value;
+    structureTypeSelect.addEventListener("change", function () {
+        let selectedStructure = structureTypeSelect.value;
         if (selectedStructure !== "growsseth:none") {
-            enableCard(selectedStructure)
+            enableStructureCard(selectedStructure)
             cardEnablerSwitch.checked = false;
-            changeColorAndLabel(false)
+            CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, false)
             updatePreview(selectedStructure)
         }
         else {
-            disableCard()
-            thisCard.classList.remove("bg-danger-subtle", "bg-success-subtle");
-            thisCard.classList.add("bg-dark-subtle");
+            CardUtils.disableCard(thisCard, warningDiv, cardEnablerDiv);
+            CardUtils.hideElements(golemVariantDiv, coordinatesDiv, rotationDiv);
             structurePreview.src = defaultPreview;
         }
     });
@@ -139,57 +129,21 @@ function addStructureCard(isNew, item) {
         zombieImgFilter();
     });
 
-    deleteCardButton.addEventListener("click", function () {
-        if (structureSelect.value === "growsseth:none") {
-            thisCard.remove();
-        } else {
-            const modal = new bootstrap.Modal(confirmDeletionModal);
-            modal.show();
-            deleteButtonModal.addEventListener("click", function () {
-                updateServer(thisCard, "remove");
-                thisCard.remove();
-            });
-        }
-    });
+    CardUtils.setupDeleteButton(thisCard, structureTypeSelect, confirmDeletionModal, deleteButtonModal, updateServer);
 
-    cardEnablerSwitch.addEventListener("click", function () {
-        changeColorAndLabel(this.checked);
-    });
+    CardUtils.setupEnablerSwitch(thisCard, cardEnablerSwitch, cardEnablerLabel);
 
-    cardContainer.querySelectorAll('input, select').forEach(function (element) {
-        element.addEventListener('change', function () {
-            updateServer(thisCard, structureSelect.value !== "growsseth:none" ? "add" : "remove");
-        });
-    });
+    CardUtils.setupAutoUpdate(thisCard, structureTypeSelect, updateServer);
 
-    function changeColorAndLabel(isActive) {
-        if (isActive)
-            thisCard.classList.remove("bg-dark-subtle", "bg-danger-subtle");
-        else
-            thisCard.classList.remove("bg-dark-subtle", "bg-success-subtle");
-        thisCard.classList.add(isActive ? "bg-success-subtle" : "bg-danger-subtle");
-        cardEnablerLabel.innerText = isActive ? activeText : notActiveText;
-    }
-
-    function enableCard(selectedStructure) {
+    function enableStructureCard(selectedStructure) {
         warningDiv.hidden = true;
-        cardEnablerDiv.hidden = false;
+        CardUtils.showElements(cardEnablerDiv, coordinatesDiv, rotationDiv);
         golemVariantDiv.hidden = (selectedStructure !== "growsseth:golem_variants");
-        coordinatesDiv.hidden = false;
-        rotationDiv.hidden = false;
-    }
-
-    function disableCard() {
-        warningDiv.hidden = false;
-        cardEnablerDiv.hidden = true;
-        golemVariantDiv.hidden = true;
-        coordinatesDiv.hidden = true;
-        rotationDiv.hidden = true;
     }
 
     function updatePreview(selectedStructure) {
         selectedStructure = selectedStructure.split(":")[1]
-        selectedPreview = defaultPreview;
+        let selectedPreview = defaultPreview;
         if (selectedStructure === "golem_variants")
             selectedPreview = selectedPreview.replace("none", "golem_variants/" + golemVariantSelect.value);
         else
@@ -199,9 +153,12 @@ function addStructureCard(isNew, item) {
     }
 
     function zombieImgFilter() {
-        if (structureSelect.value === "growsseth:golem_variants" && golemZombieSwitch.checked)
+        if (structureTypeSelect.value === "growsseth:golem_variants" && golemZombieSwitch.checked)
             structurePreview.style.filter = "sepia(100%)";
         else
             structurePreview.style.filter = "none";
     }
+
+    // Add card to top of container
+    cardContainer.insertBefore(newCard, cardContainer.firstChild);
 }

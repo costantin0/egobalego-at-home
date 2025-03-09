@@ -1,15 +1,17 @@
-let lastId;
+"use strict";
+
+import { api, state, addCardButton, CardUtils } from "./shared/utils.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const responseForLastId = await fetch("/last_id");
-    lastId = parseInt(await responseForLastId.text());
-    const responseForServerData = await fetch("/server_data");
-    let serverData = await responseForServerData.json();
+    addCardButton.initialize();
+    state.loadLastId();
+    let serverData = await state.loadServerData();
     let trade_types = ["tradePreset", "tradeCustom"]
     serverData.forEach(item => {
         if (trade_types.includes(item.type))
             addTradeCard(false, item);
     });
+    addCardButton.activate(() => addTradeCard(true));
 });
 
 async function updateServer(card, action) {
@@ -30,24 +32,19 @@ async function updateServer(card, action) {
         tradeData["content"] = content;
     tradeData = { [action]: [tradeData] };
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/data_receiver");
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(tradeData));
+    api.sendToServer(tradeData);
 }
 
-document.getElementById("add-card-button").addEventListener("click", function () {
-    addTradeCard(true);
-});
+const cardTemplate = document.querySelector("#trade-template");
+const cardContainer = document.getElementById("card-container");
+const confirmDeletionModal = document.getElementById("modal-confirm-deletion");
+const deleteButtonModal = document.getElementById("delete-button-modal");
 
 function addTradeCard(isNew, item) {
-    // Add template to top of container
-    let template = document.querySelector("#trade-template").content.cloneNode(true);
-    let cardContainer = document.getElementById("card-container");
-    cardContainer.insertBefore(template, cardContainer.firstChild);
+    let newCard = cardTemplate.content.cloneNode(true);
 
     // Get template elements
-    let thisCard = document.getElementById("trade-card");
+    let thisCard = newCard.querySelector("#trade-card");
 
     let id = thisCard.querySelector("#card-id");
 
@@ -57,12 +54,7 @@ function addTradeCard(isNew, item) {
     let cardEnablerSwitch = cardEnablerDiv.querySelector("#card-enabler-switch");
     let cardEnablerLabel = cardEnablerDiv.querySelector("#card-enabler-label");
 
-    let deleteCardButton = thisCard.querySelector("#delete-card-button");
-
-    let confirmDeletionModal = document.getElementById("modal-confirm-deletion");
-    let deleteButtonModal = document.getElementById("delete-button-modal");
-
-    let tradeSelect = thisCard.querySelector("#trade-type");
+    let tradeTypeSelect = thisCard.querySelector("#trade-type");
 
     let tradePresetDiv = thisCard.querySelector("#preset");
     let tradePreset = tradePresetDiv.querySelector("#preset-name");
@@ -71,12 +63,11 @@ function addTradeCard(isNew, item) {
     let tradeContent = tradeContentDiv.querySelector("#content-text");
 
     if (isNew) {
-        id.value = "trade-" + (lastId + 1);
-        lastId++;
+        id.value = "trade-" + state.newLastId();
     }
     else {
         id.value = item.id;
-        tradeSelect.value = item.type;
+        tradeTypeSelect.value = item.type;
         switch (item.type) {
             case "tradePreset":
                 tradePresetDiv.hidden = false;
@@ -90,76 +81,38 @@ function addTradeCard(isNew, item) {
         warningDiv.hidden = true;
         cardEnablerDiv.hidden = false;
         cardEnablerSwitch.checked = item.active
-        changeColorAndLabel(item.active);
+        CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, item.active);
     }
 
-    deleteCardButton.addEventListener("click", function () {
-        if (tradeSelect.value === "none") {
-            thisCard.remove();
-        } else {
-            const modal = new bootstrap.Modal(confirmDeletionModal);
-            modal.show();
-            deleteButtonModal.addEventListener("click", function () {
-                updateServer(thisCard, "remove");
-                thisCard.remove();
-            });
-        }
-    });
+    CardUtils.setupDeleteButton(thisCard, tradeTypeSelect, confirmDeletionModal, deleteButtonModal, updateServer);
 
-    cardEnablerSwitch.addEventListener("click", function () {
-        changeColorAndLabel(this.checked);
-    });
+    CardUtils.setupEnablerSwitch(thisCard, cardEnablerSwitch, cardEnablerLabel);
 
-    tradeSelect.addEventListener("change", function () {
-        let selectedTrade = tradeSelect.value;
+    tradeTypeSelect.addEventListener("change", function () {
+        let selectedTrade = tradeTypeSelect.value;
         if (selectedTrade !== "none") {
             warningDiv.hidden = true;
             cardEnablerDiv.hidden = false;
             cardEnablerSwitch.checked = false;
-            changeColorAndLabel(false);
+            CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, false);
             switch (selectedTrade) {
                 case "tradePreset":
-                    showElements(tradePresetDiv);
-                    hideElements(tradeContentDiv);
+                    CardUtils.showElements(tradePresetDiv);
+                    CardUtils.hideElements(tradeContentDiv);
                     break;
                 case "tradeCustom":
-                    showElements(tradeContentDiv);
-                    hideElements(tradePresetDiv);
+                    CardUtils.showElements(tradeContentDiv);
+                    CardUtils.hideElements(tradePresetDiv);
                     break;
             }
         } else {
-            warningDiv.hidden = false;
-            cardEnablerDiv.hidden = true;
-            thisCard.classList.remove("bg-danger-subtle", "bg-success-subtle");
-            thisCard.classList.add("bg-dark-subtle");
-            hideElements(tradePresetDiv, tradeContentDiv);
+            CardUtils.disableCard(thisCard, warningDiv, cardEnablerDiv)
+            CardUtils.hideElements(tradePresetDiv, tradeContentDiv);
         }
     });
 
-    cardContainer.querySelectorAll('input, select, textarea').forEach(function (element) {
-        element.addEventListener('change', function () {
-            updateServer(thisCard, tradeSelect.value !== "none" ? "add" : "remove");
-        });
-    });
+    CardUtils.setupAutoUpdate(thisCard, tradeTypeSelect, updateServer);
 
-    function changeColorAndLabel(isActive) {
-        if (isActive)
-            thisCard.classList.remove("bg-dark-subtle", "bg-danger-subtle");
-        else
-            thisCard.classList.remove("bg-dark-subtle", "bg-success-subtle");
-        thisCard.classList.add(isActive ? "bg-success-subtle" : "bg-danger-subtle");
-        cardEnablerLabel.innerText = isActive ? activeText : notActiveText;
-    }
-
-    function showElements(...divs) {
-        for (let div of divs) {
-            div.hidden = false;
-        }
-    }
-
-    function hideElements(...divs) {
-        for (let div of divs) {
-            div.hidden = true;
-        }
-    }
+    // Add card to top of container
+    cardContainer.insertBefore(newCard, cardContainer.firstChild);
 }

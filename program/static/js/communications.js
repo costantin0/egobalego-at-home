@@ -1,15 +1,17 @@
-let lastId;
+"use strict";
+
+import { api, state, addCardButton, CardUtils } from "./shared/utils.js";
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const responseForLastId = await fetch("/last_id");
-    lastId = parseInt(await responseForLastId.text());
-    const responseForServerData = await fetch("/server_data");
-    let serverData = await responseForServerData.json();
+    addCardButton.initialize();
+    state.loadLastId();
+    let serverData = await state.loadServerData();
     let communication_types = ["dialogue", "toast", "researcherDiary", "structureBook"]
     serverData.forEach(item => {
         if (communication_types.includes(item.type))
             addCommCard(false, item);
     });
+    addCardButton.activate(() => addCommCard(true));
 });
 
 async function updateServer(card, action) {
@@ -61,24 +63,19 @@ async function updateServer(card, action) {
     }
     commData = { [action]: [commData] };
 
-    let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/data_receiver");
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(commData));
+    api.sendToServer(commData);
 }
 
-document.getElementById("add-card-button").addEventListener("click", function () {
-    addCommCard(true);
-});
+const cardTemplate = document.querySelector("#communication-template");
+const cardContainer = document.getElementById("card-container");
+const confirmDeletionModal = document.getElementById("modal-confirm-deletion");
+const deleteButtonModal = document.getElementById("delete-button-modal");
 
 function addCommCard(isNew, item) {
-    // Add template to top of container
-    let template = document.querySelector("#communication-template").content.cloneNode(true);
-    let cardContainer = document.getElementById("card-container");
-    cardContainer.insertBefore(template, cardContainer.firstChild);
+    let newCard = cardTemplate.content.cloneNode(true);
 
     // Get template elements
-    let thisCard = document.getElementById("communication-card");
+    let thisCard = newCard.querySelector("#communication-card");
 
     let id = thisCard.querySelector("#card-id");
 
@@ -88,12 +85,7 @@ function addCommCard(isNew, item) {
     let cardEnablerSwitch = cardEnablerDiv.querySelector("#card-enabler-switch");
     let cardEnablerLabel = cardEnablerDiv.querySelector("#card-enabler-label");
 
-    let deleteCardButton = thisCard.querySelector("#delete-card-button");
-
-    let confirmDeletionModal = document.getElementById("modal-confirm-deletion");
-    let deleteButtonModal = document.getElementById("delete-button-modal");
-
-    let commSelect = thisCard.querySelector("#communication-type");
+    let commTypeSelect = thisCard.querySelector("#communication-type");
 
     let researcherStructDiv = thisCard.querySelector("#researcher-diary-struct");
     let diaryStructure = researcherStructDiv.querySelector("#diary-structure");
@@ -116,18 +108,17 @@ function addCommCard(isNew, item) {
 
     // Setting card
     if (isNew) {
-        id.value = "communication-" + (lastId + 1);
-        lastId++;
+        id.value = "communication-" + state.newLastId();
     }
     else {
         id.value = item.id;
         content.value = item.content;
         switch (item.type) {
             case "dialogue":
-                commSelect.value = item.type;
+                commTypeSelect.value = item.type;
                 break;
             case "toast":
-                commSelect.value = item.icon ? "toast-with-icon" : "toast-simple"
+                commTypeSelect.value = item.icon ? "toast-with-icon" : "toast-simple"
                 if (item.icon) {
                     iconNamespace.value = item.icon.split(":")[0]
                     iconItemId.value = item.icon.split(":")[1]
@@ -136,118 +127,80 @@ function addCommCard(isNew, item) {
                 break;
             case "researcherDiary":
                 if (item.title.endsWith("/endDiary")) {
-                    commSelect.value = "researcher-diary-replace-goodbye"
+                    commTypeSelect.value = "researcher-diary-replace-goodbye"
                     title.value = item.title.replace("/endDiary", "");
                 } else {
-                    commSelect.value = item.structure ? "researcher-diary-replace" : "researcher-diary-new"
+                    commTypeSelect.value = item.structure ? "researcher-diary-replace" : "researcher-diary-new"
                     title.value = item.title;
                 }
                 if (item.structure)
                     diaryStructure.value = item.structure
                 break;
             case "structureBook":
-                commSelect.value = "structure-book"
+                commTypeSelect.value = "structure-book"
                 bookStructure.value = item.structure
-                bookContent = JSON.parse(item.content)
+                let bookContent = JSON.parse(item.content)
                 author.value = bookContent.author
                 title.value = bookContent.name
                 content.value = bookContent.pages
                 break;
         }
         cardEnablerSwitch.checked = item.active
-        enableCard(commSelect.value);
-        changeColorAndLabel(item.active);
+        enableCard(commTypeSelect.value);
+        CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, item.active);
     }
 
-    deleteCardButton.addEventListener("click", function () {
-        if (commSelect.value === "none") {
-            thisCard.remove();
-        } else {
-            const modal = new bootstrap.Modal(confirmDeletionModal);
-            modal.show();
-            deleteButtonModal.addEventListener("click", function () {
-                updateServer(thisCard, "remove");
-                thisCard.remove();
-            });
-        }
-    });
+    CardUtils.setupDeleteButton(thisCard, commTypeSelect, confirmDeletionModal, deleteButtonModal, updateServer);
 
-    cardEnablerSwitch.addEventListener("click", function () {
-        changeColorAndLabel(this.checked);
-    });
+    CardUtils.setupEnablerSwitch(thisCard, cardEnablerSwitch, cardEnablerLabel);
 
-    commSelect.addEventListener("change", function () {
-        let selectedComm = commSelect.value;
+    commTypeSelect.addEventListener("change", function () {
+        let selectedComm = commTypeSelect.value;
         if (selectedComm !== "none") {
             enableCard(selectedComm);
             cardEnablerSwitch.checked = false;
-            changeColorAndLabel(false);
+            CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, false);
         }
         else {
-            warningDiv.hidden = false;
-            cardEnablerDiv.hidden = true;
-            thisCard.classList.remove("bg-danger-subtle", "bg-success-subtle");
-            thisCard.classList.add("bg-dark-subtle");
-            hideElements(bookAuthorDiv, commTitleDiv, toastIconDiv, researcherStructDiv, bookStructDiv, contentDiv);
+            CardUtils.disableCard(thisCard, warningDiv, cardEnablerDiv)
+            CardUtils.hideElements(bookAuthorDiv, commTitleDiv, toastIconDiv, researcherStructDiv, bookStructDiv, contentDiv);
         }
     });
 
-    cardContainer.querySelectorAll('input, select, textarea').forEach(function (element) {
-        element.addEventListener('change', function () {
-            updateServer(thisCard, commSelect.value !== "none" ? "add" : "remove");
-        });
-    });
-
-    function changeColorAndLabel(isActive) {
-        if (isActive)
-            thisCard.classList.remove("bg-dark-subtle", "bg-danger-subtle");
-        else
-            thisCard.classList.remove("bg-dark-subtle", "bg-success-subtle");
-        thisCard.classList.add(isActive ? "bg-success-subtle" : "bg-danger-subtle");
-        cardEnablerLabel.innerText = isActive ? activeText : notActiveText;
-    }
+    CardUtils.setupAutoUpdate(thisCard, commTypeSelect, updateServer);
 
     function enableCard(selectedComm) {
         warningDiv.hidden = true;
         cardEnablerDiv.hidden = false;
         switch (selectedComm) {
             case 'dialogue':
-                showElements(contentDiv);
-                hideElements(bookAuthorDiv, commTitleDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
+                CardUtils.showElements(contentDiv);
+                CardUtils.hideElements(bookAuthorDiv, commTitleDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
                 break;
             case 'toast-simple':
-                showElements(commTitleDiv, contentDiv);
-                hideElements(bookAuthorDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
+                CardUtils.showElements(commTitleDiv, contentDiv);
+                CardUtils.hideElements(bookAuthorDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
                 break;
             case 'toast-with-icon':
-                showElements(commTitleDiv, toastIconDiv, contentDiv);
-                hideElements(bookAuthorDiv, researcherStructDiv, bookStructDiv);
+                CardUtils.showElements(commTitleDiv, toastIconDiv, contentDiv);
+                CardUtils.hideElements(bookAuthorDiv, researcherStructDiv, bookStructDiv);
                 break;
             case 'researcher-diary-new':
             case 'researcher-diary-replace-goodbye':
-                showElements(commTitleDiv, contentDiv);
-                hideElements(bookAuthorDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
+                CardUtils.showElements(commTitleDiv, contentDiv);
+                CardUtils.hideElements(bookAuthorDiv, toastIconDiv, researcherStructDiv, bookStructDiv);
                 break;
             case 'researcher-diary-replace':
-                showElements(commTitleDiv, researcherStructDiv, contentDiv);
-                hideElements(bookAuthorDiv, toastIconDiv, bookStructDiv);
+                CardUtils.showElements(commTitleDiv, researcherStructDiv, contentDiv);
+                CardUtils.hideElements(bookAuthorDiv, toastIconDiv, bookStructDiv);
                 break;
             case 'structure-book':
-                showElements(bookAuthorDiv, commTitleDiv, bookStructDiv, contentDiv);
-                hideElements(toastIconDiv, researcherStructDiv);
+                CardUtils.showElements(bookAuthorDiv, commTitleDiv, bookStructDiv, contentDiv);
+                CardUtils.hideElements(toastIconDiv, researcherStructDiv);
                 break;
         }
     }
 
-    function showElements(...divs) {
-        for (let div of divs) {
-            div.hidden = false;
-        }
-    }
-
-    function hideElements(...divs) {
-        for (let div of divs) {
-            div.hidden = true;
-        }
-    }
+    // Add card to top of container
+    cardContainer.insertBefore(newCard, cardContainer.firstChild);
 }

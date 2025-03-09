@@ -1,3 +1,7 @@
+"use strict";
+
+import { time } from "./shared/utils.js";
+
 var socket = io();
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -38,24 +42,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let lastClickedButton;
 
-
-    socket.emit("is_mod_connected", (response) => {
-        if (response === true)
-            enableConsole()
-        else
-            disableConsole()
-    });
-
-
-    reloadButton.addEventListener("click", function () {
-        socket.emit("reload");
-        lastClickedButton = reloadButton;
-    });
-
     toastType.onchange = function () {
         toastIconDiv.hidden = (toastType.value == "toast-simple");
     };
 
+
+    // Buttons event listeners
+    reloadButton.addEventListener("click", function () {
+        socket.emit("reload");
+        lastClickedButton = reloadButton;
+    });
 
     sendDialogueButton.addEventListener("click", function () {
         let dialogue = { "content": dialogueContent.value }
@@ -80,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
+    // Socket event listeners
     socket.on('mod_connect', function() {
         enableConsole()
     });
@@ -88,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
         disableConsole()
     });
 
-
     socket.on('mod_response', (responseString) => {
         let response = JSON.parse(responseString);
         modResponseStatus.value = response.status;
@@ -96,12 +92,13 @@ document.addEventListener("DOMContentLoaded", function () {
             reportResponse(true)
         else
             reportResponse(false)
-        modResponseTimestamp.value = getCurrentTime();
+        modResponseTimestamp.value = time.getCurrentTimestamp();
         delete response.status
         modResponseDetails.value = JSON.stringify(response)
     });
 
 
+    // Page behavior
     function enableConsole() {
         allCardButtons.forEach(button => button.disabled = false);
         reloadButton.disabled = false;
@@ -125,10 +122,13 @@ document.addEventListener("DOMContentLoaded", function () {
             lastClickedButton.classList.add("btn-primary");
         }, 1000);
     }
+
+
+    // When page is initialized, check if the mod is connected
+    socket.emit("is_mod_connected", (response) => {
+        if (response === true)
+            enableConsole()
+        else
+            disableConsole()
+    });
 });
-
-
-function getCurrentTime() {
-    let now = new Date();
-    return new String(now).slice(16, 24);   // only getting the timestamp
-}
