@@ -1,7 +1,7 @@
 # Check if Python is installed
-$pythonExists = $(get-command python -ErrorAction SilentlyContinue)
+$pythonExists = $(get-command py -ErrorAction SilentlyContinue)
 if (-not $pythonExists) {
-    Write-Host "Could not find python command, please install Python 3.x: https://www.python.org/downloads/"
+    Write-Host "Could not find 'py' command, please install Python 3.x: https://www.python.org/downloads/"
     exit 1
 }
 
@@ -11,11 +11,11 @@ if (!(Test-Path $venvPath)) {
     Write-Host "Virtual environment does not exist. Creating now (please wait)..."
     py -m venv $venvPath
 }
-if (!(Test-Path "$venvPath/Scripts/Activate.ps1")) {
-    Write-Host "Virtual environment is broken ('./venv/Scripts/Activate.ps1' not found), recreating (please wait)..."
+if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
+    Write-Host "Virtual environment is broken ('.\venv\Scripts\Activate.ps1' not found), recreating (please wait)..."
     py -m venv $venvPath
 }
-if (!(Test-Path "$venvPath/Scripts/Activate.ps1")) {
+if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
     Write-Host "Could not create virtual environment, please check your Python installation."
     exit 1
 }
