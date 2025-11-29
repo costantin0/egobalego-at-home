@@ -66,7 +66,7 @@ The following fields are optional:
 
         "diaryId": "enchantment_dictionary"
 
-In **"diaryID"** goes the ID of the diary in the mod's data. To see which ones are available or add your own, you can look at the datapack (_data/growsseth/growsseth_researcher_diary/en_us_).
+In **"diaryID"** goes the ID of the diary in the mod's data. To see which ones are available or add your own, you can look at the datapack (_data/growsseth/growsseth_templates/book_).
 
 To conclude, here's an example of a trade where 15 TNTs are offered for 3 sticks and 10 carrots:
 

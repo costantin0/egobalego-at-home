@@ -66,7 +66,7 @@ I seguenti campi sono invece opzionali:
 
         "diaryId": "enchantment_dictionary"
 
-In **"diaryID"** va semplicemente l'id del diario nei dati della mod. Per vedere quali sono disponibili o aggiungerne di tuoi puoi guardare il datapack (_data/growsseth/growsseth_researcher_diary/it_it_).
+In **"diaryID"** va semplicemente l'id del diario nei dati della mod. Per vedere quali sono disponibili o aggiungerne di tuoi puoi guardare il datapack (_data/growsseth/growsseth_templates/book_).
 
 Per concludere, ecco un esempio di scambio in cui si offrono 15 TNT per 3 bastoni e 10 carote:
 
