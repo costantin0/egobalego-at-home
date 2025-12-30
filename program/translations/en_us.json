@@ -118,9 +118,9 @@
 
     "trade_type_not_set": "Trade type not set",
     "trade_preset": "Preset",
-    "trade_map": "Custom map",
-    "trade_custom": "Custom (JSON)",
+    "trade_map": "Custom (Map)",
     "trade_custom_v2": "Custom",
+    "trade_custom": "Custom (JSON)",
     "trade": "Trade",
     "trade_banner_pattern": "Banner Pattern",
     "trade_pottery_sherd": "Sherd with Logo",
@@ -128,6 +128,18 @@
     "trade_enchant_dictionary": "Enchanting Alphabet Dictionary",
     "trade_all_extras": "All non-secret mod items (for \"free\")",
     "trade_json": "Trade JSON",
+
+    "trade_result": "Result",
+    "trade_amount": "Amount",
+    "trade_item_cost": "Item cost",
+    "trade_item_cost_2": "Item cost 2",
+    "trade_priority": "Priority",
+    "trade_item_id_tag": "Item ID / Tag",
+    "trade_leave_empty_default": "(Leave empty for default)",
+    "trade_optional": "(optional)",
+
+    "trade_map_structure_id_tag": "Structure ID / Tag",
+    "trade_map_name": "Name",
 
     "no_websocket": "Connect the mod to the WebSocket to use this function",
     "mod_response_status": "Last response",

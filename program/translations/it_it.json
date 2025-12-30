@@ -118,8 +118,8 @@
 
     "trade_type_not_set": "Tipo scambio non impostato",
     "trade_preset": "Preimpostato",
-    "trade_map": "Mappa personalizzata",
     "trade_custom_v2": "Personalizzato",
+    "trade_map": "Personalizzato (mappa)",
     "trade_custom": "Personalizzato (JSON)",
     "trade": "Scambio",
     "trade_banner_pattern": "Figura per stendardo",
@@ -128,6 +128,18 @@
     "trade_enchant_dictionary": "Dizionario alfabeto antico",
     "trade_all_extras": "Tutti gli oggetti non segreti della mod (\"gratis\")",
     "trade_json": "JSON dello scambio",
+
+    "trade_result": "Risultato",
+    "trade_amount": "Quantità",
+    "trade_item_cost": "Costo item",
+    "trade_item_cost_2": "Costo item 2",
+    "trade_priority": "Priorità",
+    "trade_item_id_tag": "ID/Tag item",
+    "trade_leave_empty_default": "(Lascia vuoto per default)",
+    "trade_optional": "(opzionale)",
+
+    "trade_map_structure_id_tag": "ID/Tag struttura",
+    "trade_map_name": "Nome",
 
     "no_websocket": "Connetti la mod al WebSocket per usare questa funzionalità",
     "mod_response_status": "Ultima risposta",
