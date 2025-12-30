@@ -51,6 +51,9 @@
                         <option value="tradeMap">
                             {{ translations.trade_map }}
                         </option>
+                        <option value="tradeCustomV2">
+                            {{ translations.trade_custom_v2 }}
+                        </option>
                         <option value="tradeCustom">
                             {{ translations.trade_custom }}
                         </option>
@@ -80,8 +83,19 @@
                     </select>
                 </div>
 
-                <div id="custom-map-content" hidden class="mt-3">
-                    <div class="input-group mb-2">
+                <div id="custom-trade-content" hidden class="mt-3">
+                    <div class="input-group mb-2" id="item-result-group">
+                        <span class="input-group-text">Result</span>
+                        <input id="item-result" class="form-control" placeholder="Item ID / Tag" required />
+                        <span class="input-group-text">Amount</span>
+                        <input
+                            id="item-result-amount"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+
+                    <div class="input-group mb-2" id="structure-id-group">
                         <span class="input-group-text">Structure ID / Tag</span>
                         <input
                             id="structure-id"
@@ -90,7 +104,7 @@
                         />
                     </div>
 
-                    <div class="input-group mb-2">
+                    <div class="input-group mb-2" id="structure-name-group">
                         <span class="input-group-text">Name</span>
                         <input
                             id="name"
@@ -120,6 +134,15 @@
                         <span class="input-group-text">Amount</span>
                         <input
                             id="item-cost-amount-2"
+                            class="form-control"
+                            placeholder="(optional)"
+                        />
+                    </div>
+
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">Priority</span>
+                        <input
+                            id="trade-priority"
                             class="form-control"
                             placeholder="(optional)"
                         />

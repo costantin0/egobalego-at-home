@@ -21,7 +21,7 @@ export const state = {
 
     serverData: null,
     async loadServerData() {
-        const responseForServerData = await fetch("/server_data?skipValidation=true");
+        const responseForServerData = await fetch("/server_data/raw");
         this.serverData = await responseForServerData.json();
         return this.serverData;
     }

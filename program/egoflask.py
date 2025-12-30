@@ -7,6 +7,7 @@ from mistune import create_markdown
 from egoconfig import AppData, Consts, Routes, Templates, SocketEvents
 import egoutils as utils
 import egovalidate as validate
+import egomap
 
 def get_flask(app_name):
     """Returns a new Flask instance with the passed name"""
@@ -47,15 +48,13 @@ def get_flask(app_name):
             return "Data sent correctly to the server!"
         return "Request method was not POST!"
 
+    @app.route(Routes.SERVER_DATA_RAW, methods=['GET'])
+    def send_data_raw():
+        return AppData.server_data
+
     @app.route(Routes.SERVER_DATA, methods=['GET'])
     def send_data():
-        # used by both web ui and mod
-        skip_validation = request.args.get('skipValidation') == 'true'
-        utils.load_server_data()
-        if skip_validation:
-            return AppData.server_data
-        else:
-            return list(filter(lambda x: validate.validate_server_item(x), AppData.server_data))
+        return list(map(lambda x: egomap.convert_item_for_server(x), filter(lambda x: validate.validate_server_item(x), AppData.server_data)))
 
     @app.route(Routes.LAST_ID, methods=['GET'])
     def send_last_id():
