@@ -47,6 +47,7 @@ class Routes:
     """API endpoints for the Flask application"""
     DATA_RECEIVER = "/data_receiver"
     SERVER_DATA = "/server_data"
+    SERVER_DATA_RAW = "/server_data/raw"
     LAST_ID = "/last_id"
     SWITCH_THEME = "/switch_theme"
 

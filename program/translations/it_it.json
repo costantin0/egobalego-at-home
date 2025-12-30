@@ -118,7 +118,9 @@
 
     "trade_type_not_set": "Tipo scambio non impostato",
     "trade_preset": "Preimpostato",
-    "trade_custom": "Personalizzato",
+    "trade_map": "Mappa personalizzata",
+    "trade_custom_v2": "Personalizzato",
+    "trade_custom": "Personalizzato (JSON)",
     "trade": "Scambio",
     "trade_banner_pattern": "Figura per stendardo",
     "trade_pottery_sherd": "Coccio con logo",
