@@ -1,19 +1,24 @@
 # Check if Python is installed
-$pythonExists = $(get-command python3 -ErrorAction SilentlyContinue)
-if (-not $pythonExists) {
-    Write-Host "Could not find 'python3' command, please install Python 3.x: https://www.python.org/downloads/"
-    exit 1
+$pyCmd = Get-Command python3 -ErrorAction SilentlyContinue
+if (-not $pyCmd) {
+    $pyCmd = Get-Command py -ErrorAction SilentlyContinue
+    if (-not $pyCmd) {
+        Write-Host "Could not find 'py' or 'python3' command, please install Python 3.x: https://www.python.org/downloads/"
+        exit 1
+    }
 }
+$pythonExePath = $pyCmd.Source
+Write-Host "Python exe found at '$pythonExePath'."
 
 # Check if the virtual environment exists, create it if it doesn't
 $venvPath = "$PSScriptRoot\..\.venv"
 if (!(Test-Path $venvPath)) {
     Write-Host "Virtual environment does not exist. Creating now (please wait)..."
-    python3 -m venv $venvPath
+    & $pythonExePath -m venv $venvPath
 }
 if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
     Write-Host "Virtual environment is broken ('.\venv\Scripts\Activate.ps1' not found), recreating (please wait)..."
-    python3 -m venv $venvPath
+    & $pythonExePath -m venv $venvPath
 }
 if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
     Write-Host "Could not create virtual environment, please check your Python installation."
@@ -29,4 +34,4 @@ if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
 # Run the Python script with the passed language argument
 $script = $PSScriptRoot + "\egobalego.py"
 $lang = If ([string]::IsNullOrEmpty($args[0])) { "en_us" } Else { $args[0] }
-python3 $script --open --no-debug --lang $lang
+& $pythonExePath $script --open --no-debug --lang $lang
