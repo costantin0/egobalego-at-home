@@ -21,7 +21,7 @@ Now, here's what you have to do:
 - Create in the [root](./..) folder a new .bat file called `start-server-YOUR_LANGUAGE_NAME.bat` and write this inside it (replace `YOUR_LANGUAGE_CODE` with the code of your language):
 ```ps1
     @echo off
-    powershell -ExecutionPolicy Bypass -File "%~dp0/program/run-app.ps1" "YOUR_LANGUAGE_CODE"
+    powershell -ExecutionPolicy Bypass -File "%~dp0/run-app.ps1" "YOUR_LANGUAGE_CODE"
     pause
 ```
 

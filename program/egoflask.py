@@ -4,8 +4,8 @@ import os
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from mistune import create_markdown
-from egoconfig import AppData, Consts, Routes, Templates, SocketEvents
-import egoutils as utils
+from .egoconfig import AppData, Consts, Routes, Templates, SocketEvents
+from . import egoutils as utils
 
 def get_flask(app_name):
     """Returns a new Flask instance with the passed name"""

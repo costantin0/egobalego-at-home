@@ -1,8 +1,9 @@
 """Main entrypoint of the app"""
 
 import os, argparse, webbrowser
-from egoconfig import AppData, Consts
-import egoflask, egoutils as utils
+from .egoconfig import AppData, Consts
+from . import egoflask
+from . import egoutils as utils
 
 def main():
     """

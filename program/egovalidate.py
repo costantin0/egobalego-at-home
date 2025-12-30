@@ -1,5 +1,6 @@
-import sys, json
+"""Utilities related to validating specific server items."""
 
+import sys, json
 
 def validate_server_item(item: dict):
     # Custom trades set from the ui (not from json) and map trades

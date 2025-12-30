@@ -8,11 +8,11 @@ if (-not $pyCmd) {
     }
 }
 $pythonExePath = $pyCmd.Source
-Write-Host "Python exe found at '$pythonExePath'."
+Write-Host "Using Python from '$pythonExePath'."
 
 # Check if the virtual environment exists, create it if it doesn't
 $venvFolderName = ".egovenv"
-$venvPath = "$PSScriptRoot\..\$venvFolderName"
+$venvPath = "$PSScriptRoot\$venvFolderName"
 if (!(Test-Path $venvPath)) {
     Write-Host "Virtual environment does not exist. Creating now (please wait)..."
     & $pythonExePath -m venv $venvPath
@@ -29,10 +29,14 @@ if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
 # Activate the virtual environment
 & "$venvPath\Scripts\Activate.ps1"
 
-# Install requirements if they are not already installed
-& "$venvPath\Scripts\python.exe" -m pip install -r "$PSScriptRoot\requirements.txt"
+# Install requirements if they are not already installed (in that case, avoid cluttering the output)
+$venvPythonExe = "$venvPath\Scripts\python.exe"
+$moduleName = "program"
+& $venvPythonExe -m pip install -r "$PSScriptRoot\$moduleName\requirements.txt" | find /V "already satisfied"
 
 # Run the Python script with the passed language argument
-$script = $PSScriptRoot + "\egobalego.py"
 $lang = If ([string]::IsNullOrEmpty($args[0])) { "en_us" } Else { $args[0] }
-& $pythonExePath $script --open --no-debug --lang $lang
+# Ensure we run from the repository root so that "-m program" finds the "program" package
+Push-Location $PSScriptRoot
+& $venvPythonExe -m $moduleName --open --no-debug --lang $lang
+Pop-Location

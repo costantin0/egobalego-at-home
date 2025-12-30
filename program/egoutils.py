@@ -1,8 +1,8 @@
 """Various utility functions"""
 
 import os, json, requests
-from egoconfig import AppData, Consts
-import egovalidate as validate
+from .egoconfig import AppData, Consts
+from . import egovalidate as validate
 
 
 def load_server_data():
