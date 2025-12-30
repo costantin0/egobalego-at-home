@@ -118,7 +118,7 @@
 
     "trade_type_not_set": "Tipo scambio non impostato",
     "trade_preset": "Preimpostato",
-    "trade_custom_v2": "Personalizzato",
+    "trade_custom_v2": "Personalizzato (semplice)",
     "trade_map": "Personalizzato (mappa)",
     "trade_custom": "Personalizzato (JSON)",
     "trade": "Scambio",
@@ -134,11 +134,11 @@
     "trade_item_cost": "Costo item",
     "trade_item_cost_2": "Costo item 2",
     "trade_priority": "Priorità",
-    "trade_item_id_tag": "ID/Tag item",
+    "trade_item_id_tag": "ID / Tag item",
     "trade_leave_empty_default": "(Lascia vuoto per default)",
     "trade_optional": "(opzionale)",
 
-    "trade_map_structure_id_tag": "ID/Tag struttura",
+    "trade_map_structure_id_tag": "ID / Tag struttura",
     "trade_map_name": "Nome",
 
     "no_websocket": "Connetti la mod al WebSocket per usare questa funzionalità",

@@ -2,8 +2,15 @@ Questa è la sezione degli scambi, i quali si dividono in due categorie: **preim
 
 Gli scambi **preimpostati** sono scambi preconfezionati presenti all'interno dei dati della mod, già pronti per l'attivazione senza che serva impostare niente. Per vedere cosa fanno di preciso o modificarli li puoi trovare nella cartella degli scambi del ricercatore del datapack (_data/growsseth/growsseth_researcher_trades_). Internamente seguono lo stesso formato degli scambi personalizzati.
 
-Gli scambi **personalizzati** sono scambi liberamente impostabili. Danno molta più libertà di quelli preimpostati, ma richiedono di conoscere la sintassi JSON.  
-Seguono questo template:
+Gli scambi **personalizzati** sono scambi liberamente impostabili.
+Sono molto più flessibili di quelli preimpostati, e possono essere di tre tipi:
+*   **Personalizzato (semplice)**: permette di definire uno scambio di oggetti semplici tramite interfaccia;
+*   **Personalizzato (mappa)**: permette di creare uno scambio che vende una mappa che punta a una determinata struttura;
+*   **Personalizzato (JSON)**: permette di definire a mano il JSON per uno scambio (definito sotto).
+
+Potresti fermarti qui e usare direttamente le prime due opzioni, ma ti consigliamo di continuare a leggere, in quanto gli scambi JSON offrono più libertà.
+
+Gli scambi in formato JSON seguono questo template:
 
     {
         "gives": //TradeItemEntry,

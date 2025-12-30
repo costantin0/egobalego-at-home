@@ -2,8 +2,15 @@ This is the section for the researcher's trades, which are divided into two cate
 
 **Preset** trades are prepackaged trades present within the mod's data, ready for activation without having to set anything. To see exactly what they are or edit them, you can find them in the researcher's trade folder of the datapack (_data/growsseth/growsseth_researcher_trades_). They internally follow the same format as the custom trades.
 
-**Custom** trades are freely configurable trades. They offer much more freedom than preset ones but require knowledge of JSON syntax.  
-They follow this template:
+**Custom** trades are trades that can be freely defined.
+They are much more flexible than the preset ones, and can be of three types:
+*   **Custom (simple)**: allows you to define a simple items trade through an interface;
+*   **Custom (map)**: allows you to create a trade that sells a map pointing to a specific structure;
+*   **Custom (JSON)**: allows you to manually define the JSON for a trade (defined below).
+
+You might stop here and just use the first two options, but we recommend you continue reading, as JSON trades currently offer more freedom.
+
+JSON trades follow this template:
 
     {
         "gives": //TradeItemEntry,
