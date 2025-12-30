@@ -3,11 +3,12 @@
 import sys, json
 
 def validate_server_item(item: dict):
-    # Custom trades set from the ui (not from json) and map trades
-    # need validation to create the actually saved JSON
-    if item.get("type", None) == "tradeMap":
+    # Simple and map custom trades need validation before being sent to the mod
+    # The 'customType' field is only used by this program to differentiate
+    # between them and the JSON trades, and is ignored by the mod
+    if item.get("customType", None) == "tradeMap":
         return __validate_map_trade(item)
-    elif item.get("type", None) == "tradeCustomV2":
+    elif item.get("customType", None) == "tradeSimple":
         err = __validate_custom_trade(item)
         if err:
             print("Custom trade validation error:", err)

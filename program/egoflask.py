@@ -48,11 +48,13 @@ def get_flask(app_name):
 
     @app.route(Routes.SERVER_DATA_RAW, methods=['GET'])
     def send_data_raw():
+        # Used by the front-end, which does not need validated data
         return AppData.server_data
 
     @app.route(Routes.SERVER_DATA, methods=['GET'])
     def send_data():
-        return utils.validate_and_map_server_data_for_mod()
+        # Used by the mod, which needs validated data
+        return utils.get_validated_server_data_for_mod()
 
     @app.route(Routes.LAST_ID, methods=['GET'])
     def send_last_id():

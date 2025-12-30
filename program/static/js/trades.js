@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     addCardButton.initialize();
     state.loadLastId();
     let serverData = await state.loadServerData();
-    let trade_types = ["tradePreset", "tradeMap", "tradeCustomV2", "tradeCustom"]
+    let trade_types = ["tradePreset", "tradeCustom"]
     serverData.forEach(item => {
         if (trade_types.includes(item.type))
             addTradeCard(false, item);
@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     addCardButton.activate(() => addTradeCard(true));
 });
 
+// Used for simple and map custom trades
 function makeCustomTradeData(card, { isMap }) {
     const result = (card.querySelector("#item-result")?.value || "").trim();
     const resultAmt = (card.querySelector("#item-result-amount")?.value || "").trim();
@@ -71,15 +72,19 @@ async function updateServer(card, action) {
 
     let tradeData = {
         "id": id,
-        "type": type,
+        // Simple, map and JSON custom trades are all saved as "tradeCustom", since they have the same format in the server data
+        "type": (type === "tradePreset") ? type : "tradeCustom",
         "active": active
     };
 
     if (type === "tradePreset") {
         tradeData["name"] = preset;
-    } else if (type === "tradeMap" || type === "tradeCustomV2") {
-        tradeData["content"] = JSON.stringify(makeCustomTradeData(card, {isMap: type === "tradeMap"}));
+    } else if (type === "tradeMap" || type === "tradeSimple") {
+        // The actual type is saved within the customType field to recreate the card properly on load
+        tradeData["customType"] = type;
+        tradeData["content"] = JSON.stringify(makeCustomTradeData(card, { isMap: type === "tradeMap" }));
     } else {
+        // Custom JSON trades (tradeJson type) don't need a customType field
         tradeData["content"] = content;
     }
     tradeData = { [action]: [tradeData] };
@@ -111,13 +116,13 @@ function addTradeCard(isNew, item) {
     let tradePresetDiv = thisCard.querySelector("#preset");
     let tradePreset = tradePresetDiv.querySelector("#preset-name");
 
-    let tradeContentDiv = thisCard.querySelector("#advanced-trade-content");
-    let tradeContent = tradeContentDiv.querySelector("#content-text");
-
     let customTradeContentDiv = thisCard.querySelector("#custom-trade-content");
     let itemResultGroup = customTradeContentDiv.querySelector("#item-result-group");
     let structureIdGroup = customTradeContentDiv.querySelector("#structure-id-group");
     let structureNameGroup = customTradeContentDiv.querySelector("#structure-name-group");
+
+    let jsonTradeContentDiv = thisCard.querySelector("#json-trade-content");
+    let jsonTradeContent = jsonTradeContentDiv.querySelector("#content-text");
 
     if (isNew) {
         id.value = "trade-" + state.newLastId();
@@ -131,58 +136,67 @@ function addTradeCard(isNew, item) {
                 tradePreset.value = item.name;
                 break;
             case "tradeCustom":
-                tradeContentDiv.hidden = false;
-                tradeContent.value = item.content;
-                break;
-            case "tradeCustomV2":
-                customTradeContentDiv.hidden = false;
-                itemResultGroup.hidden = false;
-                structureIdGroup.hidden = true;
-                structureNameGroup.hidden = true;
-                if (item.content) {
-                    const c = JSON.parse(item.content);
-                    if (c.gives) {
-                        if (c.gives.id)
-                            thisCard.querySelector("#item-result").value = c.gives.id;
-                        if (c.gives.amount)
-                            thisCard.querySelector("#item-result-amount").value = c.gives.amount;
-                    }
-                    if (Array.isArray(c.wants)) {
-                        if (c.wants[0]) {
-                            thisCard.querySelector("#item-cost-1").value = c.wants[0].id || "";
-                            thisCard.querySelector("#item-cost-amount-1").value = c.wants[0].amount || "";
+                // Custom trades can be of multiple types, depending of the saved customType field
+                if (item.customType === "tradeSimple")
+                {
+                    tradeTypeSelect.value = item.customType;
+                    customTradeContentDiv.hidden = false;
+                    itemResultGroup.hidden = false;
+                    structureIdGroup.hidden = true;
+                    structureNameGroup.hidden = true;
+                    if (item.content) {
+                        const c = JSON.parse(item.content);
+                        if (c.gives) {
+                            if (c.gives.id)
+                                thisCard.querySelector("#item-result").value = c.gives.id;
+                            if (c.gives.amount)
+                                thisCard.querySelector("#item-result-amount").value = c.gives.amount;
                         }
-                        if (c.wants[1]) {
-                            thisCard.querySelector("#item-cost-2").value = c.wants[1].id || "";
-                            thisCard.querySelector("#item-cost-amount-2").value = c.wants[1].amount || "";
+                        if (Array.isArray(c.wants)) {
+                            if (c.wants[0]) {
+                                thisCard.querySelector("#item-cost-1").value = c.wants[0].id || "";
+                                thisCard.querySelector("#item-cost-amount-1").value = c.wants[0].amount || "";
+                            }
+                            if (c.wants[1]) {
+                                thisCard.querySelector("#item-cost-2").value = c.wants[1].id || "";
+                                thisCard.querySelector("#item-cost-amount-2").value = c.wants[1].amount || "";
+                            }
                         }
                     }
                 }
-                break;
-            case "tradeMap":
-                customTradeContentDiv.hidden = false;
-                itemResultGroup.hidden = true;
-                structureIdGroup.hidden = false;
-                structureNameGroup.hidden = false;
-                if (item.content) {
-                    const c = JSON.parse(item.content);
-                    if (c.gives && c.gives.map) {
-                        const map = c.gives.map;
-                        if (map.structure)
-                            thisCard.querySelector("#structure-id").value = map.structure;
-                        if (map.name)
-                            thisCard.querySelector("#name").value = map.name;
-                    }
-                    if (Array.isArray(c.wants)) {
-                        if (c.wants[0]) {
-                            thisCard.querySelector("#item-cost-1").value = c.wants[0].id || "";
-                            thisCard.querySelector("#item-cost-amount-1").value = c.wants[0].amount || "";
+                else if (item.customType === "tradeMap")
+                {
+                    tradeTypeSelect.value = item.customType;
+                    customTradeContentDiv.hidden = false;
+                    itemResultGroup.hidden = true;
+                    structureIdGroup.hidden = false;
+                    structureNameGroup.hidden = false;
+                    if (item.content) {
+                        const c = JSON.parse(item.content);
+                        if (c.gives && c.gives.map) {
+                            const map = c.gives.map;
+                            if (map.structure)
+                                thisCard.querySelector("#structure-id").value = map.structure;
+                            if (map.name)
+                                thisCard.querySelector("#name").value = map.name;
                         }
-                        if (c.wants[1]) {
-                            thisCard.querySelector("#item-cost-2").value = c.wants[1].id || "";
-                            thisCard.querySelector("#item-cost-amount-2").value = c.wants[1].amount || "";
+                        if (Array.isArray(c.wants)) {
+                            if (c.wants[0]) {
+                                thisCard.querySelector("#item-cost-1").value = c.wants[0].id || "";
+                                thisCard.querySelector("#item-cost-amount-1").value = c.wants[0].amount || "";
+                            }
+                            if (c.wants[1]) {
+                                thisCard.querySelector("#item-cost-2").value = c.wants[1].id || "";
+                                thisCard.querySelector("#item-cost-amount-2").value = c.wants[1].amount || "";
+                            }
                         }
                     }
+                }
+                else
+                {
+                    tradeTypeSelect.value = "tradeJson";
+                    jsonTradeContentDiv.hidden = false;
+                    jsonTradeContent.value = item.content;
                 }
                 break;
         }
@@ -204,33 +218,33 @@ function addTradeCard(isNew, item) {
             cardEnablerSwitch.checked = false;
             CardUtils.changeColorAndLabel(thisCard, cardEnablerLabel, false);
             CardUtils.hideElements(
-                tradeContentDiv,
-                customTradeContentDiv,
                 tradePresetDiv,
+                customTradeContentDiv,
                 itemResultGroup,
                 structureIdGroup,
                 structureNameGroup,
+                jsonTradeContentDiv,
             )
             switch (selectedTrade) {
                 case "tradePreset":
                     CardUtils.showElements(tradePresetDiv);
                     break;
+                case "tradeSimple":
+                    CardUtils.showElements(customTradeContentDiv, itemResultGroup);
+                    break;
                 case "tradeMap":
                     CardUtils.showElements(customTradeContentDiv, structureIdGroup, structureNameGroup);
                     break;
-                case "tradeCustomV2":
-                    CardUtils.showElements(customTradeContentDiv, itemResultGroup);
-                    break;
-                case "tradeCustom":
-                    CardUtils.showElements(tradeContentDiv);
+                case "tradeJson":
+                    CardUtils.showElements(jsonTradeContentDiv);
                     break;
             }
         } else {
             CardUtils.disableCard(thisCard, warningDiv, cardEnablerDiv)
             CardUtils.hideElements(
-                tradeContentDiv,
-                customTradeContentDiv,
                 tradePresetDiv,
+                customTradeContentDiv,
+                jsonTradeContentDiv,
             )
         }
     });

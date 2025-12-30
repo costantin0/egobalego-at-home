@@ -29,9 +29,9 @@
                     <select id="trade-type" class="form-select">
                         <option value="none" selected></option>
                         <option value="tradePreset">{{ translations.trade_preset }}</option>
-                        <option value="tradeCustomV2">{{ translations.trade_custom_v2 }}</option>
+                        <option value="tradeSimple">{{ translations.trade_simple }}</option>
                         <option value="tradeMap">{{ translations.trade_map }}</option>
-                        <option value="tradeCustom">{{ translations.trade_custom }}</option>
+                        <option value="tradeJson">{{ translations.trade_json }}</option>
                     </select>
                 </div>
 
@@ -114,9 +114,9 @@
                     </div>
                 </div>
 
-                <div id="advanced-trade-content" class="form-floating mt-3" hidden>
+                <div id="json-trade-content" class="form-floating mt-3" hidden>
                     <textarea id="content-text" class="form-control" style="height: 100px"></textarea>
-                    <label>{{ translations.trade_json }}</label>
+                    <label>{{ translations.trade_json_content }}</label>
                 </div>
             </div>
         </div>
