@@ -31,12 +31,12 @@ if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
 
 # Install requirements if they are not already installed (in that case, avoid cluttering the output)
 $venvPythonExe = "$venvPath\Scripts\python.exe"
-$moduleName = "program"
-& $venvPythonExe -m pip install -r "$PSScriptRoot\$moduleName\requirements.txt" | find /V "already satisfied"
+$requirementsFile = "$PSScriptRoot\program\requirements.txt"
+& $venvPythonExe -m pip install -r $requirementsFile | find /V "already satisfied"
 
 # Run the Python script with the passed language argument
 $lang = If ([string]::IsNullOrEmpty($args[0])) { "en_us" } Else { $args[0] }
 # Ensure we run from the repository root so that "-m program" finds the "program" package
 Push-Location $PSScriptRoot
-& $venvPythonExe -m $moduleName --open --no-debug --lang $lang
+& $venvPythonExe -m program.egobalego --open --no-debug --lang $lang
 Pop-Location
