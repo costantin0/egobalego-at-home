@@ -11,13 +11,14 @@ $pythonExePath = $pyCmd.Source
 Write-Host "Python exe found at '$pythonExePath'."
 
 # Check if the virtual environment exists, create it if it doesn't
-$venvPath = "$PSScriptRoot\..\.venv"
+$venvFolderName = ".egovenv"
+$venvPath = "$PSScriptRoot\..\$venvFolderName"
 if (!(Test-Path $venvPath)) {
     Write-Host "Virtual environment does not exist. Creating now (please wait)..."
     & $pythonExePath -m venv $venvPath
 }
 if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
-    Write-Host "Virtual environment is broken ('.\venv\Scripts\Activate.ps1' not found), recreating (please wait)..."
+    Write-Host "Virtual environment is broken ('$venvFolderName\Scripts\Activate.ps1' not found), recreating (please wait)..."
     & $pythonExePath -m venv $venvPath
 }
 if (!(Test-Path "$venvPath\Scripts\Activate.ps1")) {
