@@ -118,6 +118,7 @@
 
     "trade_type_not_set": "Trade type not set",
     "trade_preset": "Preset",
+    "trade_map": "Custom map",
     "trade_custom": "Custom",
     "trade": "Trade",
     "trade_banner_pattern": "Banner Pattern",

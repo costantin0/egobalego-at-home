@@ -6,7 +6,7 @@ from flask_socketio import SocketIO, emit
 from mistune import create_markdown
 from egoconfig import AppData, Consts, Routes, Templates, SocketEvents
 import egoutils as utils
-
+import egovalidate as validate
 
 def get_flask(app_name):
     """Returns a new Flask instance with the passed name"""
@@ -49,8 +49,13 @@ def get_flask(app_name):
 
     @app.route(Routes.SERVER_DATA, methods=['GET'])
     def send_data():
+        # used by both web ui and mod
+        skip_validation = request.args.get('skipValidation') == 'true'
         utils.load_server_data()
-        return AppData.server_data
+        if skip_validation:
+            return AppData.server_data
+        else:
+            return list(filter(lambda x: validate.validate_server_item(x), AppData.server_data))
 
     @app.route(Routes.LAST_ID, methods=['GET'])
     def send_last_id():
