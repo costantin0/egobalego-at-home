@@ -6,8 +6,6 @@ from flask_socketio import SocketIO, emit
 from mistune import create_markdown
 from egoconfig import AppData, Consts, Routes, Templates, SocketEvents
 import egoutils as utils
-import egovalidate as validate
-import egomap
 
 def get_flask(app_name):
     """Returns a new Flask instance with the passed name"""
@@ -54,7 +52,7 @@ def get_flask(app_name):
 
     @app.route(Routes.SERVER_DATA, methods=['GET'])
     def send_data():
-        return list(map(lambda x: egomap.convert_item_for_server(x), filter(lambda x: validate.validate_server_item(x), AppData.server_data)))
+        return utils.validate_and_map_server_data_for_mod()
 
     @app.route(Routes.LAST_ID, methods=['GET'])
     def send_last_id():

@@ -2,6 +2,7 @@
 
 import os, json, requests
 from egoconfig import AppData, Consts
+import egovalidate as validate
 
 
 def load_server_data():
@@ -141,3 +142,16 @@ def print_warning(message):
 def print_error(message):
     """Prints a colored error in the terminal"""
     print(f"{Consts.COLOR_ERROR}{message}{Consts.COLOR_ENDC}")
+
+
+def validate_and_map_server_data_for_mod():
+    """Used to validate and map custom and map trades before sending them to the mod"""
+    validated_server_data = list(filter(lambda x: validate.validate_server_item(x), AppData.server_data))
+    return list(map(lambda x: __convert_custom_trade_for_mod(x), validated_server_data))
+
+def __convert_custom_trade_for_mod(item: dict):
+    # Custom trades of type tradeCustomV2 and tradeMap must be converted to tradeCustom
+    # to respect the mod API specifications (must be called after validation)
+    if item.get("type", None) == "tradeCustomV2" or item.get("type", None) == "tradeMap":
+        return { **item, "type": "tradeCustom" }
+    return item

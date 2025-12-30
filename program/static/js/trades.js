@@ -14,9 +14,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     addCardButton.activate(() => addTradeCard(true));
 });
 
-/**
- * @param {HTMLElement} card 
- */
 function makeCustomTradeData(card, { isMap }) {
     const result = (card.querySelector("#item-result")?.value || "").trim();
     const resultAmt = (card.querySelector("#item-result-amount")?.value || "").trim();
@@ -147,7 +144,7 @@ function addTradeCard(isNew, item) {
                     if (c.gives) {
                         if (c.gives.id)
                             thisCard.querySelector("#item-result").value = c.gives.id;
-                        if (c.gives.amount) 
+                        if (c.gives.amount)
                             thisCard.querySelector("#item-result-amount").value = c.gives.amount;
                     }
                     if (Array.isArray(c.wants)) {
@@ -173,7 +170,7 @@ function addTradeCard(isNew, item) {
                         const map = c.gives.map;
                         if (map.structure)
                             thisCard.querySelector("#structure-id").value = map.structure;
-                        if (map.name) 
+                        if (map.name)
                             thisCard.querySelector("#name").value = map.name;
                     }
                     if (Array.isArray(c.wants)) {

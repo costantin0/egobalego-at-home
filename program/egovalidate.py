@@ -1,19 +1,19 @@
-import json
-import sys
-from typing import cast
+import sys, json
 
 
 def validate_server_item(item: dict):
+    # Custom trades set from the ui (not from json) and map trades
+    # need validation to create the actually saved JSON
     if item.get("type", None) == "tradeMap":
         return __validate_map_trade(item)
     elif item.get("type", None) == "tradeCustomV2":
-        err = __validate_trade(item)
+        err = __validate_custom_trade(item)
         if err:
-            print("Validation error:", err)
+            print("Custom trade validation error:", err)
             return False
     return True
-        
-def __validate_trade(item: dict):
+
+def __validate_custom_trade(item: dict):
     content = __try_parse_json(item.get("content", None))
     print(content)
     if not content:
@@ -30,7 +30,6 @@ def __validate_trade(item: dict):
         return {"wants 0 id": content["wants"][0].get("id", None)}
     if not content["wants"][0].get("amount", None):
         return {"wants 0 amount": content["wants"][0].get("amount", None)}
-    
     return None
 
 def __validate_map_trade(item: dict):
@@ -50,7 +49,6 @@ def __validate_map_trade(item: dict):
         return False
     if not content["wants"][0].get("amount", None):
         return False
-    
     return True
 
 def __try_parse_json(string: str):

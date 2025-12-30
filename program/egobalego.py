@@ -40,7 +40,7 @@ def main():
 
     # If in debug mode, allow testing the translation without restarting the app
     files_to_watch = [f for f in os.listdir(Consts.FOLDER_TRANSLATIONS) if f.endswith(".json")]
-    
+
     socketio.run(app, debug=args_debug, port=args_port, extra_files=files_to_watch)
 
 if __name__ == '__main__':
